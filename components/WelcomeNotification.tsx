@@ -64,7 +64,7 @@ export function WelcomeNotification() {
                   
                   <div>
                     <h3 className="text-sm xs:text-base sm:text-lg font-bold text-foreground bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                      Welcome Back!
+                      Hello!
                     </h3>
                     <p className="text-xs xs:text-sm text-muted-foreground/80">Good to see you again</p>
                   </div>

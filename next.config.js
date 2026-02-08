@@ -24,7 +24,7 @@ const nextConfig = {
   
   images: {
     // Required for static export
-    unoptimized: true,
+    unoptimized: false,
     remotePatterns: [
       {
         protocol: 'https',
@@ -35,6 +35,9 @@ const nextConfig = {
   
   // Trailing slash helps with static file serving
   trailingSlash: true,
+  
+  // Skip static optimization for better GitHub Pages compatibility
+  skipTrailingSlashRedirect: true,
 }
 
 module.exports = nextConfig

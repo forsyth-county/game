@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:games": "node test-games.js",
+    "test:games:headed": "HEADLESS=false node test-games.js",
+    "test:games:screenshots": "SCREENSHOT_SUCCESS=true node test-games.js",
+    "deploy": "chmod +x deploy.sh && ./deploy.sh",
+    "export": "npm run build && cd out && touch .nojekyll && cp index.html 404.html"
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^2.0.2",

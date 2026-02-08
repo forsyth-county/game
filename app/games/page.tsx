@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Search } from 'lucide-react'
+import { Search, ExternalLink, AlertTriangle } from 'lucide-react'
 import { games } from '@/data/games'
 import { GameCard } from '@/components/GameCard'
 import { GridBackground } from '@/components/ui/grid-background-demo'

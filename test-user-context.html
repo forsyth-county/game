@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Context Test</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/bad-words@3.0.4/dist/bad-words.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, createContext, useContext } = React;
+        
+        // Mock the bad-words filter
+        const Filter = window.Filter;
+        const filter = new Filter();
+        
+        // Name validation constants
+        const MAX_NAME_LENGTH = 10;
+        const VALID_CHARS_REGEX = /^[a-zA-Z\s\-']+$/;
+        const CLEAN_REGEX = /[^a-zA-Z\s\-']/g;
+        
+        // Validate and clean name
+        const validateName = (name) => {
+            const cleanName = name.replace(CLEAN_REGEX, '').trim();
+            
+            if (!cleanName) {
+                return { isValid: false, error: 'Name must contain at least one letter' };
+            }
+            
+            if (cleanName.length > MAX_NAME_LENGTH) {
+                return { isValid: false, error: `Name must be ${MAX_NAME_LENGTH} characters or less` };
+            }
+            
+            if (!/[a-zA-Z]/.test(cleanName)) {
+                return { isValid: false, error: 'Name must contain at least one letter' };
+            }
+            
+            return { isValid: true, cleanName };
+        };
+        
+        function TestComponent() {
+            const [testName, setTestName] = useState('');
+            const [result, setResult] = useState('');
+            
+            const testValidation = () => {
+                const trimmedName = testName.trim();
+                
+                // Check for profanity
+                if (filter.isProfane(trimmedName)) {
+                    setResult('❌ PROFANITY DETECTED: ' + trimmedName);
+                    return;
+                }
+                
+                const validation = validateName(trimmedName);
+                
+                if (!validation.isValid) {
+                    setResult('❌ INVALID: ' + validation.error);
+                } else {
+                    setResult('✅ VALID: ' + validation.cleanName);
+                }
+            };
+            
+            return (
+                <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+                    <h2>User Context Validation Test</h2>
+                    <div style={{ marginBottom: '20px' }}>
+                        <input
+                            type="text"
+                            value={testName}
+                            onChange={(e) => setTestName(e.target.value)}
+                            placeholder="Enter name to test"
+                            style={{ padding: '8px', width: '300px', marginRight: '10px' }}
+                        />
+                        <button onClick={testValidation} style={{ padding: '8px 16px' }}>
+                            Test
+                        </button>
+                    </div>
+                    <div style={{ marginBottom: '20px' }}>
+                        <strong>Result:</strong> {result}
+                    </div>
+                    <div>
+                        <h3>Test Cases:</h3>
+                        <button onClick={() => { setTestName('John'); testValidation(); }}>Valid: "John"</button>
+                        <button onClick={() => { setTestName('Mary-Jane'); testValidation(); }}>Valid: "Mary-Jane"</button>
+                        <button onClick={() => { setTestName('O\'Connor'); testValidation(); }}>Valid: "O'Connor"</button>
+                        <button onClick={() => { setTestName('John123'); testValidation(); }}>Invalid: "John123"</button>
+                        <button onClick={() => { setTestName('fuck'); testValidation(); }}>Profanity: "fuck"</button>
+                        <button onClick={() => { setTestName(''); testValidation(); }}>Empty</button>
+                        <button onClick={() => { setTestName('VeryLongNameThatExceedsLimit'); testValidation(); }}>Too Long</button>
+                    </div>
+                </div>
+            );
+        }
+        
+        ReactDOM.render(<TestComponent />, document.getElementById('root'));
+    </script>
+</body>
+</html>

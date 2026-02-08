@@ -79,6 +79,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
     try {
       if (name && name.trim()) {
         const trimmedName = name.trim()
+        
+        // Check for profanity using the bad-words filter
+        if (filter.isProfane(trimmedName)) {
+          setError('Please enter a name without inappropriate language.')
+          return
+        }
+        
         const validation = validateName(trimmedName)
         
         if (!validation.isValid) {

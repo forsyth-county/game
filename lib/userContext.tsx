@@ -23,30 +23,29 @@ const CLEAN_REGEX = /[^a-zA-Z\s\-']/g
 
 // Validate and clean name
 const validateName = (name: string): { isValid: boolean; error?: string; cleanName?: string } => {
-  // Remove all invalid characters (numbers, emojis, special chars)
-  const cleanName = name.replace(CLEAN_REGEX, '').trim()
+  const trimmedName = name.trim()
   
-  // Check if empty after cleaning
-  if (!cleanName) {
+  // Check for invalid characters (numbers, emojis, special chars) - reject entirely if found
+  if (!VALID_CHARS_REGEX.test(trimmedName)) {
+    return { isValid: false, error: 'Name can only contain letters, spaces, hyphens, and apostrophes' }
+  }
+  
+  // Check if empty after trimming
+  if (!trimmedName) {
     return { isValid: false, error: 'Name must contain at least one letter' }
   }
   
   // Check length
-  if (cleanName.length > MAX_NAME_LENGTH) {
+  if (trimmedName.length > MAX_NAME_LENGTH) {
     return { isValid: false, error: `Name must be ${MAX_NAME_LENGTH} characters or less` }
   }
   
-  // Check for valid characters only (letters, spaces, hyphens, apostrophes)
-  if (!VALID_CHARS_REGEX.test(cleanName)) {
-    return { isValid: false, error: 'Name can only contain letters, spaces, hyphens, and apostrophes' }
-  }
-  
   // Check if it's just spaces or special chars
-  if (!/[a-zA-Z]/.test(cleanName)) {
+  if (!/[a-zA-Z]/.test(trimmedName)) {
     return { isValid: false, error: 'Name must contain at least one letter' }
   }
   
-  return { isValid: true, cleanName }
+  return { isValid: true, cleanName: trimmedName }
 }
 
 export function UserProvider({ children }: { children: ReactNode }) {

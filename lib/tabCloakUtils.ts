@@ -35,7 +35,7 @@ export const CLOAK_OPTIONS: CloakOption[] = [
     title: 'Dashboard',
     bgColor: '#1a0000', // dark red background
     cssClass: 'cloak-canvas',
-    logoUrl: 'https://du11hjcvx0uqb.cloudfront.net/dist/images/branding/canvas-logo-cropped-1-748cb6e4e1.svg'
+    logoUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYWy6tLxBPdE65jokTz4cBuyyNGDkupZVdtg&s'
   },
   {
     id: 'classlink',
@@ -43,7 +43,7 @@ export const CLOAK_OPTIONS: CloakOption[] = [
     title: 'ClassLink LaunchPad',
     bgColor: '#000a14', // dark blue background
     cssClass: 'cloak-classlink',
-    logoUrl: 'https://launchpad.classlink.com/Content/Images/CL_Logo_White.png'
+    logoUrl: 'https://play-lh.googleusercontent.com/ujsa1M8GdT-fo-GfPazpUwgPXVWEOWKUgKZk-SdnUhmcL3opS24MiHe6ypEgqxGpllw'
   },
   {
     id: 'linewize',
@@ -51,7 +51,7 @@ export const CLOAK_OPTIONS: CloakOption[] = [
     title: 'Linewize',
     bgColor: '#000a14', // dark blue background
     cssClass: 'cloak-linewize',
-    logoUrl: 'https://www.linewize.com/hubfs/Linewize-Logo-White.svg'
+    logoUrl: 'https://gdm-catalog-fmapi-prod.imgix.net/ProductLogo/f23cec1c-1e86-4dc3-9e77-ce04c063ef21.jpeg?w=128&h=128&fit=max&dpr=3&auto=format&q=50'
   },
   {
     id: 'infinite-campus',
@@ -59,6 +59,6 @@ export const CLOAK_OPTIONS: CloakOption[] = [
     title: 'Campus Portal',
     bgColor: '#001a00', // dark green background
     cssClass: 'cloak-infinite-campus',
-    logoUrl: 'https://www.infinitecampus.com/wp-content/uploads/2021/11/IC_Logo_Horizontal_White.png'
+    logoUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ42gffXGN4oQVaYZZgITnmDRr-O6sGxYmDaA&s'
   }
 ]

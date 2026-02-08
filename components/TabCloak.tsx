@@ -205,28 +205,26 @@ export function TabCloak() {
                     backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='20' height='20' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 20 0 L 0 0 0 20' fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='1'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)' /%3E%3C/svg%3E")`
                   }} />
                   
-                  {/* Theme Logo Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20 p-2">
-                      {option.logoUrl ? (
-                        <img 
-                          src={option.logoUrl} 
-                          alt={`${option.name} logo`}
-                          className="w-full h-full object-contain"
-                          onError={(e) => {
-                            // Fallback to emoji if image fails to load
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                            const parent = target.parentElement;
-                            if (parent) {
-                              parent.innerHTML = getFallbackEmoji(option.id);
-                            }
-                          }}
-                        />
-                      ) : (
-                        <div className="text-2xl">{getFallbackEmoji(option.id)}</div>
-                      )}
-                    </div>
+                  {/* Theme Logo as Main Element */}
+                  <div className="absolute inset-0 flex items-center justify-center p-4">
+                    {option.logoUrl ? (
+                      <img 
+                        src={option.logoUrl} 
+                        alt={`${option.name} logo`}
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          // Fallback to emoji if image fails to load
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent) {
+                            parent.innerHTML = `<div class="text-4xl">${getFallbackEmoji(option.id)}</div>`;
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="text-4xl">{getFallbackEmoji(option.id)}</div>
+                    )}
                   </div>
                   
                   {/* Color indicator */}

@@ -27,6 +27,9 @@ export const metadata: Metadata = {
   icons: {
     icon: 'https://site.imsglobal.org/sites/default/files/orgs/logos/primary/fcslogo_hexagon.png',
   },
+  verification: {
+    google: 'dBeR2SaEdkXg7Pf2jyWBcxc32UHXzfB-MdjpPje0h3g',
+  },
   openGraph: {
     title: 'Forsyth Educational Portal - Learn & Play',
     description: 'Your gateway to educational games and interactive learning tools. Fast, safe, and designed for student success.',

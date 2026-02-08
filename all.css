@@ -606,8 +606,8 @@ iframe {
     image-rendering: crisp-edges;
     
     /* Enable all hardware acceleration features */
-    transform: translateZ(0) scale(1);
-    -webkit-transform: translateZ(0) scale(1);
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
     
     /* Ensure full resolution is maintained */
     width: 100%;
@@ -616,5 +616,5 @@ iframe {
     max-height: 100%;
     
     /* Prevent performance degradation */
-    will-change: transform, opacity;
+    will-change: transform;
 }

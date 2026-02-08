@@ -115,15 +115,9 @@ export default function PlayPageClient({ slug }: PlayPageClientProps) {
           className="w-full h-full border-none game-iframe"
           onLoad={() => setLoading(false)}
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-          allowFullScreen
           allow="autoplay; fullscreen; picture-in-picture; gamepad; accelerometer; gyroscope"
           referrerPolicy="no-referrer-when-downgrade"
           loading="eager"
-          style={{
-            imageRendering: 'crisp-edges',
-            transform: 'translateZ(0)',
-            willChange: 'transform',
-          }}
         />
       </div>
     </div>

@@ -17,6 +17,35 @@ const popularGames = [
 
 export default function GamesPage() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [isOpening, setIsOpening] = useState(false)
+
+  // Function to open all games in different tabs
+  const openAllGames = async () => {
+    setIsOpening(true)
+    
+    try {
+      // Get all filtered games
+      const gamesToOpen = filteredGames
+      
+      // Open each game in a new tab with a small delay to prevent browser blocking
+      for (let i = 0; i < gamesToOpen.length; i++) {
+        const game = gamesToOpen[i]
+        const gameUrl = `/play/${game.id}`
+        
+        // Open in new tab
+        window.open(gameUrl, '_blank')
+        
+        // Small delay between openings to prevent browser from blocking
+        if (i < gamesToOpen.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 100))
+        }
+      }
+    } catch (error) {
+      console.error('Error opening games:', error)
+    } finally {
+      setIsOpening(false)
+    }
+  }
 
   // Filter games based on search and appropriateness
   const filteredGames = useMemo(() => {
@@ -71,6 +100,49 @@ export default function GamesPage() {
         <p className="text-yellow-500/80 font-medium">
           📚 Educational Learning Platform - Use Responsibly
         </p>
+        
+        {/* Open All Games Button */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4 }}
+          className="flex flex-col items-center gap-3"
+        >
+          <motion.button
+            onClick={openAllGames}
+            disabled={isOpening || totalGames === 0}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="relative group px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isOpening ? (
+              <>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                />
+                Opening {totalGames} games...
+              </>
+            ) : (
+              <>
+                <ExternalLink className="w-5 h-5" />
+                Open All {totalGames} Games
+              </>
+            )}
+          </motion.button>
+          
+          {/* Warning Message */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="flex items-center gap-2 text-amber-400 text-sm max-w-md text-center"
+          >
+            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+            <span>⚠️ This will open {totalGames} tabs simultaneously - may impact browser performance</span>
+          </motion.div>
+        </motion.div>
       </motion.div>
 
       {/* Search Bar */}

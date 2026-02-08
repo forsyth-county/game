@@ -13,6 +13,7 @@ import { TimeBasedAccessControl } from '@/components/TimeBasedAccessControl'
 import { GeoLock } from '@/components/GeoLock'
 import { UserProvider } from '@/lib/userContext'
 import { MouseGradient } from '@/components/MouseGradient'
+import { VisitorTracker } from '@/components/VisitorTracker'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -80,6 +81,7 @@ export default function RootLayout({
         
         <div className="fixed inset-0 bg-gradient-cosmic -z-10" />
         <MouseGradient />
+        <VisitorTracker />
         <GeoLock />
         <TimeBasedAccessControl />
         <Protection />

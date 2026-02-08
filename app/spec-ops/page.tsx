@@ -81,7 +81,7 @@ export default function AdminPage() {
     
     const fetchVisitorStats = async () => {
       try {
-        const response = await fetch('/api/stats')
+        const response = await fetch('https://portal-t795.onrender.com/api/stats')
         if (!response.ok) {
           throw new Error('Failed to fetch visitor stats')
         }

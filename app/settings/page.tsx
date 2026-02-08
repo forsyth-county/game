@@ -7,29 +7,156 @@ import { GameSuggestionForm } from '@/components/GameSuggestionForm'
 import { FormSuccessNotification } from '@/components/FormSuccessNotification'
 import { cn } from "@/lib/utils";
 import { useUser } from '@/lib/userContext';
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCSRFToken, useFormRateLimit } from '@/lib/securityHooks';
 
 export default function SettingsPage() {
-  const { userName, setUserName, clearUserName, isLoaded, error, setError } = useUser();
-  const [nameInput, setNameInput] = useState(isLoaded ? (userName || '') : '');
+  const { userName, setUserName, clearUserName, isLoaded, error, setError, securityState } = useUser();
+  const { token: csrfToken, validateToken } = useCSRFToken();
+  const { isRateLimited, recordAttempt, resetAttempts: resetRateLimit } = useFormRateLimit(5, 60000);
+  const [nameInput, setNameInput] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastSubmitTime, setLastSubmitTime] = useState(0);
+  const submitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Rate limiting: prevent rapid submissions
+  const SUBMIT_COOLDOWN = 2000; // 2 seconds between submissions
+  const MAX_SUBMIT_ATTEMPTS = 3;
+  const [submitAttempts, setSubmitAttempts] = useState(0);
 
-  const handleNameSubmit = (e: React.FormEvent) => {
+  // Set nameInput after component mounts to avoid hydration mismatch
+  useEffect(() => {
+    if (isLoaded) {
+      setNameInput(userName || '');
+    }
+  }, [isLoaded, userName]);
+
+  // Sanitize input to prevent XSS and injection attacks
+  const sanitizeInput = useCallback((input: string): string => {
+    return input
+      .trim()
+      // Remove potentially dangerous characters
+      .replace(/[<>"'&]/g, '')
+      // Limit length to prevent buffer overflow attempts
+      .slice(0, 50)
+      // Remove control characters
+      .replace(/[\x00-\x1F\x7F]/g, '')
+      // Normalize whitespace
+      .replace(/\s+/g, ' ');
+  }, []);
+
+  const handleNameSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    setUserName(nameInput);
-  };
+    
+    // Prevent multiple simultaneous submissions
+    if (isSubmitting) {
+      return;
+    }
+    
+    // CSRF token validation (for demonstration - in real app this would be server-side)
+    if (!csrfToken) {
+      setError('Security token not available. Please refresh the page.');
+      return;
+    }
+    
+    // Enhanced rate limiting check
+    if (isRateLimited()) {
+      setError('Too many attempts. Please wait before trying again.');
+      return;
+    }
+    
+    if (!recordAttempt()) {
+      setError('Rate limit exceeded. Please try again later.');
+      return;
+    }
+    
+    // Rate limiting check
+    const now = Date.now();
+    if (now - lastSubmitTime < SUBMIT_COOLDOWN) {
+      setError('Please wait before submitting again.');
+      return;
+    }
+    
+    // Check if user is locked out from userContext
+    if (securityState.isLocked) {
+      setError(securityState.lockUntil > now 
+        ? `Account temporarily locked. Try again in ${Math.ceil((securityState.lockUntil - now) / 1000)} seconds.`
+        : 'Account temporarily locked. Please try again later.');
+      return;
+    }
+    
+    const sanitizedInput = sanitizeInput(nameInput);
+    
+    // Validate sanitized input
+    if (!sanitizedInput || sanitizedInput.length < 2) {
+      setError('Name must be at least 2 characters long.');
+      setSubmitAttempts(prev => prev + 1);
+      return;
+    }
+    
+    if (sanitizedInput !== nameInput.trim()) {
+      setError('Name contains invalid characters and has been sanitized.');
+      setNameInput(sanitizedInput);
+      setSubmitAttempts(prev => prev + 1);
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setLastSubmitTime(now);
+    
+    try {
+      // Simulate network delay to prevent timing attacks
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // In a real application, you would send the CSRF token to the server
+      // and validate it there before processing the request
+      console.log('CSRF Token for validation:', csrfToken);
+      
+      setUserName(sanitizedInput);
+      setSubmitAttempts(0); // Reset on success
+      resetRateLimit(); // Reset rate limit on success
+    } catch (error) {
+      console.error('Failed to save name:', error);
+      setError('Failed to save name. Please try again.');
+      setSubmitAttempts(prev => prev + 1);
+    } finally {
+      setIsSubmitting(false);
+      
+      // Clear submit timeout
+      if (submitTimeoutRef.current) {
+        clearTimeout(submitTimeoutRef.current);
+      }
+      
+      // Lock out after too many failed attempts
+      if (submitAttempts >= MAX_SUBMIT_ATTEMPTS - 1) {
+        setError('Too many failed attempts. Please wait before trying again.');
+        submitTimeoutRef.current = setTimeout(() => {
+          setSubmitAttempts(0);
+          resetRateLimit();
+        }, 30000); // 30 second lockout
+      }
+    }
+  }, [nameInput, isSubmitting, lastSubmitTime, submitAttempts, securityState, sanitizeInput, setUserName, setError, csrfToken, isRateLimited, recordAttempt, resetRateLimit]);
 
   const handleNameClear = () => {
     setNameInput('');
     clearUserName();
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNameInput(e.target.value);
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Prevent extremely long inputs during typing
+    if (value.length > 50) {
+      return;
+    }
+    
+    setNameInput(value);
     // Clear error when user starts typing
     if (error) {
       setError(null);
     }
-  };
+  }, [error, setError]);
 
   return (
     <div className="relative min-h-screen w-full bg-white dark:bg-black">
@@ -132,8 +259,11 @@ export default function SettingsPage() {
                           onChange={handleInputChange}
                           placeholder="Enter your name"
                           maxLength={50}
+                          autoComplete="name"
+                          disabled={isSubmitting || securityState.isLocked}
                           className={cn(
                             "flex-1 px-4 py-3 rounded-xl border backdrop-blur-sm transition-all duration-200",
+                            "disabled:opacity-50 disabled:cursor-not-allowed",
                             error 
                               ? "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-900 dark:text-red-100 placeholder-red-500 dark:placeholder-red-400 focus:ring-red-500 focus:border-red-500"
                               : "border-slate-300 dark:border-slate-600 bg-white/70 dark:bg-slate-800/70 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-blue-500 focus:border-blue-500"
@@ -161,10 +291,21 @@ export default function SettingsPage() {
                       <button
                         type="submit"
                         onClick={handleNameSubmit}
-                        disabled={!nameInput.trim() || nameInput.trim() === userName}
-                        className="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100 shadow-lg"
+                        disabled={!nameInput.trim() || 
+                                 nameInput.trim() === userName || 
+                                 isSubmitting || 
+                                 securityState.isLocked ||
+                                 (securityState.isLocked && Date.now() < securityState.lockUntil)}
+                        className={cn(
+                          "w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 transform",
+                          "shadow-lg hover:scale-105 disabled:hover:scale-100",
+                          "bg-gradient-to-r from-blue-600 to-purple-600",
+                          "hover:from-blue-700 hover:to-purple-700",
+                          "text-white",
+                          "disabled:opacity-50 disabled:cursor-not-allowed"
+                        )}
                       >
-                        Save Name
+                        {isSubmitting ? 'Saving...' : 'Save Name'}
                       </button>
                     </div>
                   </div>

@@ -9,7 +9,7 @@ export function MouseGradient() {
   const pathname = usePathname()
 
   // Only show on main page (root path)
-  const shouldShow = pathname === '/'
+  const shouldShow = pathname && pathname === '/'
 
   useEffect(() => {
     // Only set up listeners if we're on the main page

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Shield, Lock, Send, Trash2, Bell, CheckCircle, AlertTriangle, School, BarChart3, Users, Wifi, WifiOff } from 'lucide-react'
+import { Shield, Lock, Send, Trash2, Bell, CheckCircle, AlertTriangle, School, BarChart3, Users, Wifi, WifiOff, Eye, TrendingUp, Calendar } from 'lucide-react'
 import { SecurityUtils } from '@/lib/security'
 import { adminAnnouncementService } from '@/lib/adminAnnouncementService'
 import type { AnnouncementData } from '@/lib/announcementService'
@@ -26,51 +26,23 @@ const FORSYTH_SCHOOLS = [
   'Pinecrest Academy'
 ]
 
-// Generate mock visitor data for schools
-const generateSchoolVisitors = (totalVisitors: number) => {
-  const schools: { name: string; visitors: number; percentage: number }[] = []
-  let remaining = totalVisitors
-  
-  // Distribute visitors across schools with realistic variation
-  const shuffledSchools = [...FORSYTH_SCHOOLS].sort(() => Math.random() - 0.5)
-  
-  shuffledSchools.forEach((school, index) => {
-    if (index === shuffledSchools.length - 1) {
-      // Last school gets remaining visitors
-      schools.push({
-        name: school,
-        visitors: remaining,
-        percentage: Math.round((remaining / totalVisitors) * 100)
-      })
-    } else {
-      // Random distribution with weights (some schools more popular)
-      const maxShare = Math.floor(remaining * 0.4) // Max 40% for any school
-      const minShare = Math.floor(remaining * 0.05) // Min 5%
-      const visitors = Math.floor(Math.random() * (maxShare - minShare)) + minShare
-      remaining -= visitors
-      schools.push({
-        name: school,
-        visitors,
-        percentage: Math.round((visitors / totalVisitors) * 100)
-      })
-    }
-  })
-  
-  // Sort by visitors descending
-  return schools.sort((a, b) => b.visitors - a.visitors)
-}
-
-// Generate fluctuating visitor count between 100-500
-const generateVisitorCount = () => {
-  const baseCount = Math.floor(Math.random() * 401) + 100 // 100-500
-  
-  // Reduce players on weekends (30% fewer)
-  const isWeekend = new Date().getDay() === 0 || new Date().getDay() === 6 // Sunday = 0, Saturday = 6
-  if (isWeekend) {
-    return Math.floor(baseCount * 0.7) // 30% reduction
+// Real visitor stats interface
+interface VisitorStats {
+  today: {
+    uniqueVisitors: number
+    totalVisits: number
+    date: string
   }
-  
-  return baseCount
+  last7Days: Array<{
+    date: string
+    uniqueVisitors: number
+    totalVisits: number
+  }>
+  overall: {
+    uniqueVisitors: number
+    totalVisits: number
+    startDate: string
+  }
 }
 
 
@@ -100,22 +72,32 @@ export default function AdminPage() {
   const [isSecureConnection, setIsSecureConnection] = useState(false)
 
   // Analytics state
-  const [currentVisitors, setCurrentVisitors] = useState(generateVisitorCount())
-  const [schoolBreakdown, setSchoolBreakdown] = useState(generateSchoolVisitors(generateVisitorCount()))
-  const [lastUpdated, setLastUpdated] = useState(new Date())
+  const [visitorStats, setVisitorStats] = useState<VisitorStats | null>(null)
+  const [analyticsError, setAnalyticsError] = useState<string | null>(null)
 
-  // Update mock analytics every hour for realistic fluctuation
+  // Fetch real visitor analytics from backend
   useEffect(() => {
     if (!isAuthenticated) return
     
-    const refreshMockAnalytics = () => {
-      const newVisitors = generateVisitorCount()
-      setCurrentVisitors(newVisitors)
-      setSchoolBreakdown(generateSchoolVisitors(newVisitors))
-      setLastUpdated(new Date())
+    const fetchVisitorStats = async () => {
+      try {
+        const response = await fetch('/api/stats')
+        if (!response.ok) {
+          throw new Error('Failed to fetch visitor stats')
+        }
+        const data = await response.json()
+        setVisitorStats(data.stats)
+        setAnalyticsError(null)
+      } catch (err) {
+        setAnalyticsError(err instanceof Error ? err.message : 'Unknown error')
+        console.error('Failed to fetch visitor stats:', err)
+      }
     }
+
+    fetchVisitorStats()
     
-    const interval = setInterval(refreshMockAnalytics, 60 * 60 * 1000) // 1 hour
+    // Refresh stats every 30 seconds
+    const interval = setInterval(fetchVisitorStats, 30000)
     return () => clearInterval(interval)
   }, [isAuthenticated])
 
@@ -536,18 +518,20 @@ export default function AdminPage() {
           </h2>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-            <span>Live • Updated {lastUpdated.toLocaleTimeString()}</span>
+            <span>Live • Updated {new Date().toLocaleTimeString()}</span>
           </div>
         </div>
 
-        {/* Total Visitors Card */}
+        {/* Real Visitor Analytics */}
         <div className="p-6 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Current Active Visitors</p>
+              <p className="text-sm text-muted-foreground mb-1">Today's Unique Visitors</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-black text-foreground">{currentVisitors}</span>
-                <span className="text-sm text-muted-foreground">users online</span>
+                <span className="text-5xl font-black text-foreground">
+                  {visitorStats?.today?.uniqueVisitors || 0}
+                </span>
+                <span className="text-sm text-muted-foreground">people today</span>
               </div>
             </div>
             <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
@@ -556,55 +540,45 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* School Breakdown */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <School className="w-5 h-5 text-secondary" />
-            Visitors by Forsyth County School
+            <TrendingUp className="w-5 h-5 text-secondary" />
+            7-Day Visitor Trend
           </h3>
           
-          <div className="grid gap-3">
-            {schoolBreakdown.map((school, index) => (
-              <div key={school.name} className="p-4 rounded-xl bg-background/50 border border-border">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                      index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
-                      index === 1 ? 'bg-gray-400/20 text-gray-400' :
-                      index === 2 ? 'bg-orange-500/20 text-orange-400' :
-                      'bg-muted text-muted-foreground'
-                    }`}>
-                      {index + 1}
-                    </span>
-                    <span className="font-medium text-foreground">{school.name}</span>
+          {analyticsError ? (
+            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              <p>❌ {analyticsError}</p>
+            </div>
+          ) : visitorStats ? (
+            <div className="grid gap-3">
+              {visitorStats.last7Days?.map((day: any, index: number) => (
+                <div key={day.date} className="p-3 rounded-xl bg-background/50 border border-border">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">{day.date}</span>
+                    <span className="text-lg font-bold text-foreground">{day.uniqueVisitors}</span>
                   </div>
-                  <div className="text-right">
-                    <span className="text-lg font-bold text-foreground">{school.visitors}</span>
-                    <span className="text-xs text-muted-foreground ml-1">({school.percentage}%)</span>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-primary to-secondary rounded-full"
+                      style={{ width: `${Math.max(2, (day.uniqueVisitors / Math.max(...visitorStats.last7Days.map(d => d.uniqueVisitors))) * 100)}%` }}
+                    />
                   </div>
                 </div>
-                {/* Progress bar */}
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${school.percentage}%` }}
-                    transition={{ duration: 0.5, ease: 'easeOut' }}
-                    className={`h-full rounded-full ${
-                      index === 0 ? 'bg-gradient-to-r from-primary to-secondary' :
-                      index === 1 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
-                      index === 2 ? 'bg-gradient-to-r from-purple-500 to-pink-500' :
-                      'bg-gradient-to-r from-gray-500 to-gray-400'
-                    }`}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-sm">
+              <p>Loading visitor statistics...</p>
+            </div>
+          )}
         </div>
-
-        <p className="text-xs text-muted-foreground text-center italic">
-          * Analytics data is refreshed every hour. Weekend traffic shows reduced player counts.
-        </p>
+        
+        <div className="mt-6 text-center">
+          <p className="text-xs text-muted-foreground">
+            📊 Real-time analytics powered by your own backend • Data refreshes every 30 seconds
+          </p>
+        </div>
       </motion.section>
 
       {/* Current Announcement */}

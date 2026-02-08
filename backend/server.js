@@ -136,10 +136,11 @@ app.get('/api/health', (req, res) => {
 app.post('/api/visit', 
   // generalLimit,
   (req, res) => {
-    const { page } = req.body;
+    const { page, timestamp, userAgent: clientUserAgent, referrer } = req.body;
     const clientIP = req.ip || req.connection.remoteAddress;
-    const userAgent = req.get('User-Agent') || '';
+    const userAgent = clientUserAgent || req.get('User-Agent') || '';
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    const now = new Date();
     
     // Reset daily visitors if needed
     resetDailyVisitors();
@@ -148,7 +149,8 @@ app.post('/api/visit',
     if (!visitors.daily.has(today)) {
       visitors.daily.set(today, {
         uniqueVisitors: new Set(),
-        totalVisits: 0
+        totalVisits: 0,
+        visits: [] // Store detailed visit logs
       });
     }
     
@@ -167,9 +169,31 @@ app.post('/api/visit',
     todayStats.uniqueVisitors.add(visitorId);
     todayStats.totalVisits++;
     
+    // Log detailed visit information
+    const visitLog = {
+      visitorId,
+      timestamp: timestamp || Date.now(),
+      page: page || '/',
+      ip: clientIP,
+      userAgent: userAgent.substring(0, 200), // Limit length
+      referrer: referrer || 'direct',
+      time: now.toISOString(),
+      isNewVisitor
+    };
+    
+    // Add to today's visit logs (keep last 1000 for performance)
+    if (!todayStats.visits) todayStats.visits = [];
+    todayStats.visits.push(visitLog);
+    if (todayStats.visits.length > 1000) {
+      todayStats.visits = todayStats.visits.slice(-1000);
+    }
+    
     // Update overall stats
     visitors.overall.totalVisitors.add(visitorId);
     visitors.overall.totalVisits++;
+    
+    // Log to console for real-time monitoring
+    console.log(`📍 VISIT LOGGED: ${page} | Visitor: ${visitorId.substring(0, 8)}... | IP: ${clientIP} | Time: ${now.toISOString()} | New: ${isNewVisitor}`);
     
     res.json({
       success: true,
@@ -184,6 +208,12 @@ app.post('/api/visit',
           totalVisits: visitors.overall.totalVisits,
           startDate: visitors.overall.startDate
         }
+      },
+      visitLog: {
+        id: visitorId.substring(0, 8),
+        page: page || '/',
+        timestamp: now.toISOString(),
+        isNewVisitor
       }
     });
   }
@@ -192,7 +222,7 @@ app.post('/api/visit',
 // GET /api/stats - Get visitor statistics (public endpoint)
 app.get('/api/stats', (req, res) => {
   const today = new Date().toISOString().split('T')[0];
-  const todayStats = visitors.daily.get(today) || { uniqueVisitors: new Set(), totalVisits: 0 };
+  const todayStats = visitors.daily.get(today) || { uniqueVisitors: new Set(), totalVisits: 0, visits: [] };
   
   // Get last 7 days of stats
   const last7Days = [];
@@ -209,13 +239,22 @@ app.get('/api/stats', (req, res) => {
     });
   }
   
+  // Get recent activity (last 10 visits)
+  const recentActivity = (todayStats.visits || []).slice(-10).reverse().map(visit => ({
+    page: visit.page,
+    timestamp: visit.time,
+    isNewVisitor: visit.isNewVisitor,
+    visitorId: visit.visitorId.substring(0, 8)
+  }));
+  
   res.json({
     success: true,
     stats: {
       today: {
         uniqueVisitors: todayStats.uniqueVisitors.size,
         totalVisits: todayStats.totalVisits,
-        date: today
+        date: today,
+        recentActivity
       },
       last7Days: last7Days,
       overall: {
@@ -224,6 +263,29 @@ app.get('/api/stats', (req, res) => {
         startDate: visitors.overall.startDate
       }
     }
+  });
+});
+
+// GET /api/visits-live - Get real-time visitor logs (admin endpoint)
+app.get('/api/visits-live', (req, res) => {
+  const today = new Date().toISOString().split('T')[0];
+  const todayStats = visitors.daily.get(today) || { visits: [] };
+  
+  // Get all visits from today, most recent first
+  const allVisits = (todayStats.visits || []).slice().reverse().map(visit => ({
+    visitorId: visit.visitorId.substring(0, 8),
+    page: visit.page,
+    timestamp: visit.time,
+    ip: visit.ip,
+    isNewVisitor: visit.isNewVisitor,
+    referrer: visit.referrer
+  }));
+  
+  res.json({
+    success: true,
+    visits: allVisits,
+    totalToday: allVisits.length,
+    uniqueToday: todayStats.uniqueVisitors ? todayStats.uniqueVisitors.size : 0
   });
 });
 

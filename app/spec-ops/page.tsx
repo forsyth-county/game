@@ -74,6 +74,8 @@ export default function AdminPage() {
   // Analytics state
   const [visitorStats, setVisitorStats] = useState<VisitorStats | null>(null)
   const [analyticsError, setAnalyticsError] = useState<string | null>(null)
+  const [liveVisits, setLiveVisits] = useState<any[]>([])
+  const [isLiveMode, setIsLiveMode] = useState(true)
 
   // Fetch real visitor analytics from backend
   useEffect(() => {
@@ -94,12 +96,33 @@ export default function AdminPage() {
       }
     }
 
+    const fetchLiveVisits = async () => {
+      try {
+        const response = await fetch('https://portal-t795.onrender.com/api/visits-live')
+        if (!response.ok) {
+          throw new Error('Failed to fetch live visits')
+        }
+        const data = await response.json()
+        setLiveVisits(data.visits || [])
+      } catch (err) {
+        console.error('Failed to fetch live visits:', err)
+      }
+    }
+
+    // Initial fetch
     fetchVisitorStats()
+    fetchLiveVisits()
     
-    // Refresh stats every 30 seconds
-    const interval = setInterval(fetchVisitorStats, 30000)
+    // Real-time updates every 5 seconds when in live mode
+    const interval = setInterval(() => {
+      fetchVisitorStats()
+      if (isLiveMode) {
+        fetchLiveVisits()
+      }
+    }, isLiveMode ? 5000 : 30000) // 5 seconds for live mode, 30 seconds for normal
+    
     return () => clearInterval(interval)
-  }, [isAuthenticated])
+  }, [isAuthenticated, isLiveMode])
 
   // Update rate limit countdown every second
   useEffect(() => {
@@ -574,9 +597,65 @@ export default function AdminPage() {
           )}
         </div>
         
+        {/* Live Visitor Feed */}
+        <div className="mt-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <Eye className="w-5 h-5 text-primary" />
+              Live Visitor Feed
+            </h3>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsLiveMode(!isLiveMode)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  isLiveMode 
+                    ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
+                    : 'bg-background/50 text-muted-foreground border border-border'
+                }`}
+              >
+                {isLiveMode ? '🔴 Live' : '⏸️ Paused'}
+              </button>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <div className={`w-2 h-2 rounded-full ${isLiveMode ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></div>
+                <span>{isLiveMode ? '5s updates' : '30s updates'}</span>
+              </div>
+            </div>
+          </div>
+          
+          {liveVisits.length > 0 ? (
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {liveVisits.slice(0, 20).map((visit, index) => (
+                <div key={index} className="p-3 rounded-xl bg-background/50 border border-border flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-2 h-2 rounded-full ${visit.isNewVisitor ? 'bg-green-400' : 'bg-blue-400'}`}></div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-foreground">{visit.page}</span>
+                        {visit.isNewVisitor && (
+                          <span className="px-2 py-0.5 bg-green-500/10 text-green-400 text-xs rounded-full">NEW</span>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {visit.visitorId} • {new Date(visit.timestamp).toLocaleTimeString()}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {visit.ip?.substring(0, 8)}...
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-sm">
+              <p>No visitor activity yet today</p>
+            </div>
+          )}
+        </div>
+        
         <div className="mt-6 text-center">
           <p className="text-xs text-muted-foreground">
-            📊 Real-time analytics powered by your own backend • Data refreshes every 30 seconds
+            📊 Real-time analytics powered by your own backend • {isLiveMode ? 'Live mode - updates every 5 seconds' : 'Normal mode - updates every 30 seconds'}
           </p>
         </div>
       </motion.section>

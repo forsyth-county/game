@@ -75,9 +75,13 @@ export function Footer() {
                 <button className="group w-10 h-10 rounded-xl bg-gradient-to-br from-muted/50 to-muted border border-border/50 flex items-center justify-center transition-all hover:scale-110 hover:shadow-lg hover:shadow-primary/10">
                   <Twitter className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 </button>
-                <button className="group w-10 h-10 rounded-xl bg-gradient-to-br from-muted/50 to-muted border border-border/50 flex items-center justify-center transition-all hover:scale-110 hover:shadow-lg hover:shadow-primary/10">
+                <a 
+                  href="mailto:forsyth-games@schoolcancelled.today" 
+                  className="group w-10 h-10 rounded-xl bg-gradient-to-br from-muted/50 to-muted border border-border/50 flex items-center justify-center transition-all hover:scale-110 hover:shadow-lg hover:shadow-primary/10"
+                  aria-label="Email us"
+                >
                   <Mail className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                </button>
+                </a>
               </motion.div>
             </div>
 
@@ -177,13 +181,14 @@ export function Footer() {
                   <FileText className="w-4 h-4 text-primary/40 group-hover:text-primary transition-colors" />
                   <span className="group-hover:translate-x-1 transition-transform">Terms of Service</span>
                 </Link>
-                <Link 
-                  href="/contact" 
+                <a 
+                  href="mailto:forsyth-games@schoolcancelled.today" 
                   className="text-sm text-muted-foreground hover:text-primary transition-all duration-200 flex items-center gap-3 group py-2 px-3 rounded-lg hover:bg-primary/5"
+                  aria-label="Email us"
                 >
                   <Mail className="w-4 h-4 text-primary/40 group-hover:text-primary transition-colors" />
                   <span className="group-hover:translate-x-1 transition-transform">Contact Us</span>
-                </Link>
+                </a>
               </div>
             </motion.div>
           </div>

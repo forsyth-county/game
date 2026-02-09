@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const crypto = require('crypto');
 require('dotenv').config();
 const { connectDB, getDB } = require('./db');
 const twoFA = require('./twoFactorAuth');
@@ -9,13 +10,23 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Enable trust proxy for rate limiting behind reverse proxies (Render, etc.)
+// This allows express-rate-limit to correctly identify users via X-Forwarded-For header
+app.set('trust proxy', 1);
+
+// Middleware to generate nonce for CSP
+app.use((req, res, next) => {
+  res.locals.cspNonce = crypto.randomBytes(16).toString('base64');
+  next();
+});
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
+      scriptSrc: ["'self'", (req, res) => `'nonce-${res.locals.cspNonce}'`],
       imgSrc: ["'self'", "data:", "https:"],
     },
   },
@@ -210,6 +221,7 @@ app.get('/2fa', (req, res) => {
   // Check if passcode is provided and correct
   const passcode = req.query.passcode;
   const correctPasscode = process.env.PASSCODE || '1100'; // Read from environment variable
+  const nonce = res.locals.cspNonce;
   
   // If passcode is not provided or incorrect, show login form
   if (passcode !== correctPasscode) {
@@ -308,7 +320,7 @@ app.get('/2fa', (req, res) => {
           <div class="lock-icon">🔐</div>
           <h1>2FA Code Access</h1>
           <p>Enter passcode to view current 2FA code</p>
-          <form onsubmit="return submitPasscode(event)">
+          <form id="passcodeForm">
             <input 
               type="password" 
               id="passcode" 
@@ -322,13 +334,12 @@ app.get('/2fa', (req, res) => {
           </form>
           ${passcode && passcode !== correctPasscode ? '<div class="error">❌ Incorrect passcode</div>' : ''}
         </div>
-        <script>
-          function submitPasscode(event) {
+        <script nonce="${nonce}">
+          document.getElementById('passcodeForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const passcode = document.getElementById('passcode').value;
             window.location.href = '/2fa?passcode=' + passcode;
-            return false;
-          }
+          });
         </script>
       </body>
       </html>
@@ -407,7 +418,7 @@ app.get('/2fa', (req, res) => {
           <div class="progress-fill" id="progress"></div>
         </div>
       </div>
-      <script>
+      <script nonce="${nonce}">
         let secondsLeft = ${secondsRemaining};
         const totalSeconds = 30;
         let timerInterval;

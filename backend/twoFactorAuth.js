@@ -1,14 +1,9 @@
 const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
 
-// Hard-coded secret for the 2FA system (in production, this should be per-user and stored securely)
-const SECRET = speakeasy.generateSecret({
-  name: 'Forsyth Portal Admin',
-  length: 32
-});
-
-// Store the base32 secret for consistency
-const BASE32_SECRET = SECRET.base32;
+// Hard-coded secret for the 2FA system (persistent across restarts)
+// This ensures the TOTP codes remain consistent
+const BASE32_SECRET = 'JBSWY3DPEHPK3PXP JBSWY3DPEHPK3PXP';
 
 /**
  * Generate a new TOTP code

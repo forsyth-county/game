@@ -21,6 +21,12 @@ export interface GameHistory {
 // Maximum number of games to track in history
 const MAX_HISTORY_SIZE = 50
 
+// Recommendation scoring constants
+const RECENCY_DECAY_PERIOD_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
+const CATEGORY_SCORE_WEIGHT = 10
+const SERIES_MATCH_SCORE = 5
+const MIN_WORD_LENGTH_FOR_SERIES = 3
+
 /**
  * Get play history from localStorage
  */
@@ -123,7 +129,7 @@ export function getCategoryPreferences(allGames: Game[]): Map<string, number> {
     if (game && game.category) {
       const currentScore = categoryScores.get(game.category) || 0
       // Weight by both count and recency
-      const recencyWeight = Math.max(0.1, 1 - (Date.now() - play.timestamp) / (30 * 24 * 60 * 60 * 1000)) // decay over 30 days
+      const recencyWeight = Math.max(0.1, 1 - (Date.now() - play.timestamp) / RECENCY_DECAY_PERIOD_MS)
       categoryScores.set(game.category, currentScore + (play.count * recencyWeight))
     }
   })
@@ -162,7 +168,7 @@ export function getPersonalizedRecommendations(
 
       // Category preference score
       const categoryScore = categoryPreferences.get(game.category) || 0
-      score += categoryScore * 10
+      score += categoryScore * CATEGORY_SCORE_WEIGHT
 
       // Boost if same developer/series (basic heuristic based on name similarity)
       const playedGames = history.plays.slice(0, 10).map(p => {
@@ -173,10 +179,10 @@ export function getPersonalizedRecommendations(
       playedGames.forEach(playedName => {
         // Check for common words (series/franchise detection)
         const commonWords = game.name.split(' ').filter(word => 
-          word.length > 3 && playedName.includes(word)
+          word.length > MIN_WORD_LENGTH_FOR_SERIES && playedName.includes(word)
         )
         if (commonWords.length > 0) {
-          score += 5 * commonWords.length
+          score += SERIES_MATCH_SCORE * commonWords.length
         }
       })
 

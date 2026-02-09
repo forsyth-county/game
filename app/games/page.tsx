@@ -46,13 +46,6 @@ export default function GamesPage() {
     })
   }, [searchQuery])
 
-  // Popular games fallback list
-  const popularGames = [
-    '1v1lol', '10-minutes-till-dawn', 'bloons-tower-defense-5', 'fruit-ninja',
-    'plants-vs-zombies', 'among-us', 'eaglercraft', 'monkey-mart', 'temple-run-2',
-    'subway-surfers-san-francisco', 'slope', 'retrobowl', 'cookie-click', 'tetris'
-  ]
-
   // Get "We may think you like this" section
   // Use personalized recommendations if available, otherwise use popular games
   const recommendationsList = useMemo(() => {

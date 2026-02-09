@@ -9,11 +9,11 @@ import { GridBackground } from '@/components/ui/grid-background-demo'
 import { config } from '@/config/games'
 import { getPersonalizedRecommendations, hasPlayHistory } from '@/lib/gameTracking'
 
-// Popular games that should be shown first
-const popularGames = [
+// Popular games that should be shown first (fallback when no personalization)
+const popularGameIds = [
   '1v1lol', '10-minutes-till-dawn', 'bloons-tower-defense-5', 'fruit-ninja',
   'plants-vs-zombies', 'among-us', 'eaglercraft', 'monkey-mart', 'temple-run-2',
-  'subway-surfers', 'crossy-road', 'geometry-dash', 'minecraft', 'retro-bowl'
+  'subway-surfers-san-francisco', 'slope', 'retrobowl', 'cookie-click', 'tetris'
 ]
 
 export default function GamesPage() {
@@ -59,7 +59,7 @@ export default function GamesPage() {
     if (userHasHistory && recommendedGames.length > 0) {
       return recommendedGames.filter(game => filteredGames.includes(game))
     } else {
-      return filteredGames.filter(game => popularGames.includes(game.id))
+      return filteredGames.filter(game => popularGameIds.includes(game.id))
     }
   }, [filteredGames, userHasHistory, recommendedGames])
 

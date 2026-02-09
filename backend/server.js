@@ -205,8 +205,138 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// GET /2fa - Get current 2FA code (for display/testing)
+// GET /2fa - Get current 2FA code (for display/testing) - Protected by passcode
 app.get('/2fa', (req, res) => {
+  // Check if passcode is provided and correct
+  const passcode = req.query.passcode;
+  const correctPasscode = '1100';
+  
+  // If passcode is not provided or incorrect, show login form
+  if (passcode !== correctPasscode) {
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>2FA Code - Authentication Required</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body {
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+          }
+          .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+          }
+          h1 {
+            margin-top: 0;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+          }
+          .lock-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+          }
+          input {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.2rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-align: center;
+            letter-spacing: 0.5rem;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+          }
+          input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: normal;
+          }
+          input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.15);
+          }
+          button {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            background: #4ade80;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+          button:hover {
+            background: #22c55e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 222, 128, 0.4);
+          }
+          button:active {
+            transform: translateY(0);
+          }
+          .error {
+            color: #fca5a5;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+          }
+          p {
+            opacity: 0.8;
+            margin-bottom: 2rem;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="lock-icon">🔐</div>
+          <h1>2FA Code Access</h1>
+          <p>Enter passcode to view current 2FA code</p>
+          <form onsubmit="return submitPasscode(event)">
+            <input 
+              type="password" 
+              id="passcode" 
+              placeholder="Enter passcode" 
+              maxlength="4"
+              autocomplete="off"
+              autofocus
+              required
+            />
+            <button type="submit">Unlock</button>
+          </form>
+          ${passcode && passcode !== correctPasscode ? '<div class="error">❌ Incorrect passcode</div>' : ''}
+        </div>
+        <script>
+          function submitPasscode(event) {
+            event.preventDefault();
+            const passcode = document.getElementById('passcode').value;
+            window.location.href = '/2fa?passcode=' + passcode;
+            return false;
+          }
+        </script>
+      </body>
+      </html>
+    `);
+    return;
+  }
+  
+  // Passcode is correct, show the 2FA code
   const { code, secondsRemaining, expiresAt } = twoFA.getCurrentCode();
   
   // Return HTML page with auto-refresh
@@ -216,6 +346,7 @@ app.get('/2fa', (req, res) => {
     <head>
       <title>2FA Code</title>
       <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
         body {
           font-family: 'Courier New', monospace;
@@ -279,6 +410,7 @@ app.get('/2fa', (req, res) => {
       <script>
         let secondsLeft = ${secondsRemaining};
         const totalSeconds = 30;
+        let timerInterval;
         
         // Update timer display every 1 second
         function updateTimer() {
@@ -287,6 +419,7 @@ app.get('/2fa', (req, res) => {
           document.getElementById('progress').style.width = progress + '%';
           
           if (secondsLeft <= 0) {
+            clearInterval(timerInterval);
             location.reload();
           } else {
             secondsLeft--;
@@ -295,10 +428,11 @@ app.get('/2fa', (req, res) => {
         
         // Start immediate countdown - updates every 1 second
         updateTimer();
-        setInterval(updateTimer, 1000);
+        timerInterval = setInterval(updateTimer, 1000);
         
         // Auto-refresh when code expires (backup mechanism)
         setTimeout(() => {
+          clearInterval(timerInterval);
           location.reload();
         }, ${secondsRemaining * 1000 + 100});
       </script>

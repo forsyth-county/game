@@ -7,9 +7,13 @@ export function GoogleAnalytics() {
     // Initialize Google Analytics
     if (typeof window !== 'undefined') {
       window.dataLayer = window.dataLayer || []
+      
+      // Define gtag function and assign to window
       function gtag(...args: any[]) {
         window.dataLayer.push(args)
       }
+      window.gtag = gtag
+      
       gtag('js', new Date())
       gtag('config', 'G-FGXXN9EK0N')
     }
@@ -22,5 +26,6 @@ export function GoogleAnalytics() {
 declare global {
   interface Window {
     dataLayer: any[]
+    gtag: (...args: any[]) => void
   }
 }

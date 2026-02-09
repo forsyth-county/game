@@ -8,7 +8,6 @@ import { GameCard } from '@/components/GameCard'
 import { Footer } from '@/components/Footer'
 import { BookmarkNotification } from '@/components/BookmarkNotification'
 
-import { WelcomeNotification } from '@/components/WelcomeNotification'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { GridBackground } from '@/components/ui/grid-background-demo'
@@ -74,7 +73,6 @@ export default function Home() {
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       <GridBackground />
-      <WelcomeNotification />
       <BookmarkNotification />
       
       {/* Hero Section - Redesigned */}

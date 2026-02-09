@@ -19,7 +19,7 @@ const changelog: ChangeEntry[] = [
     changes: [
       { type: 'feature', description: 'Added share notification with copy link functionality' },
       { type: 'feature', description: 'Added changelog page' },
-      { type: 'improvement', description: 'Updated Google Analytics to use G-NMD57F7NKF tracking ID' },
+      { type: 'improvement', description: 'Updated Google Analytics tracking configuration' },
       { type: 'improvement', description: 'Footer now integrates seamlessly with the website design' },
       { type: 'improvement', description: 'Twitter/X link now points to @FCSchoolsGA' },
       { type: 'improvement', description: 'Protected badge now links to Cloudflare' },

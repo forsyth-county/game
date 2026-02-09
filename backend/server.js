@@ -50,15 +50,15 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Rate limiters for different endpoint types
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
+  max: 500, // Limit each IP to 500 requests per windowMs (increased from 100)
+  message: 'Rate limit exceeded. Please wait a moment.',
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 authentication attempts per windowMs
+  max: 20, // Limit each IP to 20 authentication attempts per windowMs (increased from 5)
   message: 'Too many authentication attempts, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -66,7 +66,7 @@ const authLimiter = rateLimit({
 
 const adminLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 10, // Limit admin actions to 10 per minute
+  max: 30, // Limit admin actions to 30 per minute (increased from 10)
   message: 'Too many admin requests, please slow down.',
   standardHeaders: true,
   legacyHeaders: false,

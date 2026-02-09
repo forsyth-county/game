@@ -132,14 +132,21 @@ export default function AdminPage() {
     return () => clearInterval(interval)
   }, [isAuthenticated, isLiveMode])
 
-  // Fetch current 2FA code every second when on 2FA screen
+  // Fetch current 2FA code periodically when on 2FA screen
   useEffect(() => {
     if (!requires2FA || isAuthenticated) return
 
     const fetch2FACode = async () => {
       try {
         const response = await fetch('https://portal-t795.onrender.com/api/2fa/current')
-        if (!response.ok) throw new Error('Failed to fetch 2FA code')
+        if (!response.ok) {
+          // Don't spam on errors - wait longer before retry
+          if (response.status === 429) {
+            console.warn('Rate limited - backing off')
+            return
+          }
+          throw new Error('Failed to fetch 2FA code')
+        }
         const data = await response.json()
         setCurrent2FACode(data.code)
         setCodeExpiresIn(data.secondsRemaining)
@@ -151,8 +158,8 @@ export default function AdminPage() {
     // Initial fetch
     fetch2FACode()
 
-    // Update every second
-    const interval = setInterval(fetch2FACode, 1000)
+    // Update every 30 seconds (matching code refresh rate)
+    const interval = setInterval(fetch2FACode, 30000)
     return () => clearInterval(interval)
   }, [requires2FA, isAuthenticated])
 
@@ -485,31 +492,14 @@ export default function AdminPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="glass rounded-2xl border border-border p-8 max-w-md w-full mx-4"
           >
-            <div className="text-center space-y-4 mb-8">
+            <div className="text-center space-y-6 mb-8">
               <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto">
                 <Shield className="w-8 h-8 text-green-400" />
               </div>
-              <h1 className="text-2xl font-bold text-foreground">Two-Factor Authentication</h1>
-              <p className="text-muted-foreground text-sm">
-                Enter the current 2FA code from the backend
-              </p>
-              
-              {/* Display current code info (for reference - user should check backend) */}
-              <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
-                <p className="text-xs text-muted-foreground mb-2">
-                  Visit <a href="https://portal-t795.onrender.com/2fa" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">portal-t795.onrender.com/2fa</a> for current code
-                </p>
-                <div className="flex items-center justify-center gap-3">
-                  <div className="text-2xl font-mono font-bold text-primary tracking-wider">
-                    ••••••
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
-                    <span className="text-xs text-muted-foreground mt-1">{codeExpiresIn}s</span>
-                  </div>
-                </div>
-                <p className="text-xs text-yellow-400 mt-2">
-                  🔒 Code refreshes every 30 seconds
+              <div>
+                <h1 className="text-2xl font-bold text-foreground mb-2">Two-Factor Authentication</h1>
+                <p className="text-muted-foreground text-sm">
+                  Enter your 6-digit verification code
                 </p>
               </div>
 
@@ -519,12 +509,9 @@ export default function AdminPage() {
                   <div className="w-2 h-2 rounded-full bg-green-400"></div>
                   <span className="text-green-400">Password Verified</span>
                 </div>
-                <div className="text-muted-foreground">
-                  IP: {userIP || 'Detecting...'}
-                </div>
                 {loginAttempts > 0 && (
                   <div className="text-orange-400">
-                    2FA Attempts: {loginAttempts}/{MAX_LOGIN_ATTEMPTS}
+                    Attempts: {loginAttempts}/{MAX_LOGIN_ATTEMPTS}
                   </div>
                 )}
               </div>

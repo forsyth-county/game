@@ -11,7 +11,6 @@ import { games } from '@/data/games'
 const navItems = [
   { name: 'Home', href: '/' },
   { name: 'Games', href: '/games' },
-  { name: 'Utilities', href: '/utilities' },
   { name: 'Settings', href: '/settings' },
 ]
 

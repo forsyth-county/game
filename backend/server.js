@@ -24,6 +24,7 @@ app.use(cors({
     'https://forsyth-county.github.io',
     'https://forsyth-county.github.io/portal/',
     'https://portal-t795.onrender.com',
+    'https://forsyth.onrender.com',
     'http://localhost:3002',
     'http://localhost:3000'
   ],

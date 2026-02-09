@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const crypto = require('crypto');
 require('dotenv').config();
 const { connectDB, getDB } = require('./db');
 const twoFA = require('./twoFactorAuth');
@@ -15,7 +16,6 @@ app.set('trust proxy', 1);
 
 // Middleware to generate nonce for CSP
 app.use((req, res, next) => {
-  const crypto = require('crypto');
   res.locals.cspNonce = crypto.randomBytes(16).toString('base64');
   next();
 });

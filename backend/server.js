@@ -280,6 +280,7 @@ app.get('/2fa', (req, res) => {
         let secondsLeft = ${secondsRemaining};
         const totalSeconds = 30;
         
+        // Update timer display every 1 second
         function updateTimer() {
           document.getElementById('timer').textContent = secondsLeft;
           const progress = (secondsLeft / totalSeconds) * 100;
@@ -289,16 +290,17 @@ app.get('/2fa', (req, res) => {
             location.reload();
           } else {
             secondsLeft--;
-            setTimeout(updateTimer, 1000);
           }
         }
         
+        // Start immediate countdown - updates every 1 second
         updateTimer();
+        setInterval(updateTimer, 1000);
         
-        // Auto-refresh when code expires
+        // Auto-refresh when code expires (backup mechanism)
         setTimeout(() => {
           location.reload();
-        }, ${secondsRemaining * 1000});
+        }, ${secondsRemaining * 1000 + 100});
       </script>
     </body>
     </html>

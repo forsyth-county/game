@@ -731,7 +731,7 @@ export default function AdminPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-primary" />
-            Live Analytics
+            Today's Analytics
           </h2>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
@@ -739,117 +739,54 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Real Visitor Analytics */}
-        <div className="p-6 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Today's Unique Visitors</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-black text-foreground">
-                  {visitorStats?.today?.uniqueVisitors || 0}
-                </span>
-                <span className="text-sm text-muted-foreground">people today</span>
+        {/* Today's Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Today's Unique Visitors */}
+          <div className="p-6 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Today's Unique Visitors</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-black text-foreground">
+                    {visitorStats?.today?.uniqueVisitors || 0}
+                  </span>
+                  <span className="text-sm text-muted-foreground">people today</span>
+                </div>
+              </div>
+              <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+                <Users className="w-8 h-8 text-primary" />
               </div>
             </div>
-            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
-              <Users className="w-8 h-8 text-primary" />
-            </div>
           </div>
-        </div>
 
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-secondary" />
-            7-Day Visitor Trend
-          </h3>
-          
-          {analyticsError ? (
-            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-              <p>❌ {analyticsError}</p>
-            </div>
-          ) : visitorStats ? (
-            <div className="grid gap-3">
-              {visitorStats.last7Days?.map((day: any, index: number) => (
-                <div key={day.date} className="p-3 rounded-xl bg-background/50 border border-border">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">{day.date}</span>
-                    <span className="text-lg font-bold text-foreground">{day.uniqueVisitors}</span>
-                  </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-primary to-secondary rounded-full"
-                      style={{ width: `${Math.max(2, (day.uniqueVisitors / Math.max(...visitorStats.last7Days.map(d => d.uniqueVisitors))) * 100)}%` }}
-                    />
-                  </div>
+          {/* Current Active Users */}
+          <div className="p-6 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Active Users Right Now</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-black text-foreground">
+                    {liveVisits.length}
+                  </span>
+                  <span className="text-sm text-muted-foreground">online now</span>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-sm">
-              <p>Loading visitor statistics...</p>
-            </div>
-          )}
-        </div>
-        
-        {/* Live Visitor Feed */}
-        <div className="mt-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-              <Eye className="w-5 h-5 text-primary" />
-              Live Visitor Feed
-            </h3>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsLiveMode(!isLiveMode)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                  isLiveMode 
-                    ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
-                    : 'bg-background/50 text-muted-foreground border border-border'
-                }`}
-              >
-                {isLiveMode ? '🔴 Live' : '⏸️ Paused'}
-              </button>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <div className={`w-2 h-2 rounded-full ${isLiveMode ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></div>
-                <span>{isLiveMode ? '5s updates' : '30s updates'}</span>
+              </div>
+              <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
+                <Eye className="w-8 h-8 text-green-400" />
               </div>
             </div>
           </div>
-          
-          {liveVisits.length > 0 ? (
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {liveVisits.slice(0, 20).map((visit, index) => (
-                <div key={index} className="p-3 rounded-xl bg-background/50 border border-border flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${visit.isNewVisitor ? 'bg-green-400' : 'bg-blue-400'}`}></div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-foreground">{visit.page}</span>
-                        {visit.isNewVisitor && (
-                          <span className="px-2 py-0.5 bg-green-500/10 text-green-400 text-xs rounded-full">NEW</span>
-                        )}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {visit.visitorId} • {new Date(visit.timestamp).toLocaleTimeString()}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {visit.ip?.substring(0, 8)}...
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-sm">
-              <p>No visitor activity yet today</p>
-            </div>
-          )}
         </div>
         
-        <div className="mt-6 text-center">
+        {analyticsError && (
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <p>❌ {analyticsError}</p>
+          </div>
+        )}
+        
+        <div className="text-center">
           <p className="text-xs text-muted-foreground">
-            📊 Real-time analytics powered by your own backend • {isLiveMode ? 'Live mode - updates every 5 seconds' : 'Normal mode - updates every 30 seconds'}
+            📊 Real-time analytics powered by your own backend • Updates every 5 seconds
           </p>
         </div>
       </motion.section>

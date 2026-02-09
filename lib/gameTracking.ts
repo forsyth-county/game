@@ -4,7 +4,6 @@ import { Game } from '@/lib/types'
 
 // Storage keys
 const PLAY_HISTORY_KEY = 'forsyth-game-history'
-const FAVORITES_KEY = 'forsyth-game-favorites'
 
 // Types
 export interface GamePlay {

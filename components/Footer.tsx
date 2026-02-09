@@ -152,7 +152,7 @@ export function Footer() {
             >
               <h4 className="font-semibold text-foreground flex items-center gap-2">
                 <Shield className="w-4 h-4 text-primary animate-pulse" />
-                Legal & Info
+                Legal & Information
               </h4>
               <div className="space-y-3">
                 <Link 

@@ -12,29 +12,18 @@ export function Footer() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.8, duration: 0.6 }}
-      className="relative mt-20 overflow-hidden"
+      className="relative mt-32 overflow-hidden"
     >
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
-      
-      {/* Floating particles */}
-      <div className="absolute top-10 left-10 w-2 h-2 bg-primary/30 rounded-full animate-pulse" />
-      <div className="absolute top-20 right-20 w-3 h-3 bg-secondary/30 rounded-full animate-pulse [animation-delay:1s]" />
-      <div className="absolute bottom-10 left-1/3 w-2 h-2 bg-primary/20 rounded-full animate-pulse [animation-delay:2s]" />
-      
-      {/* Enhanced gradient divider with animation */}
+      {/* Subtle gradient divider */}
       <motion.div 
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{ delay: 1.0, duration: 0.8 }}
-        className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent origin-center"
+        className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/30 to-transparent origin-center"
       />
-      
-      {/* Enhanced glow effect */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-40 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent blur-3xl -z-10 animate-pulse" />
 
-      <div className="glass border-t border-border/20 backdrop-blur-2xl bg-gradient-to-b from-background/90 via-background/70 to-background/50 relative">
-        <div className="max-w-7xl mx-auto px-6 py-20">
+      <div className="relative">
+        <div className="max-w-7xl mx-auto px-6 py-16">
           {/* Main footer content */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             {/* Enhanced Brand section */}
@@ -72,9 +61,15 @@ export function Footer() {
                 <button className="group w-10 h-10 rounded-xl bg-gradient-to-br from-muted/50 to-muted border border-border/50 flex items-center justify-center transition-all hover:scale-110 hover:shadow-lg hover:shadow-primary/10">
                   <Github className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 </button>
-                <button className="group w-10 h-10 rounded-xl bg-gradient-to-br from-muted/50 to-muted border border-border/50 flex items-center justify-center transition-all hover:scale-110 hover:shadow-lg hover:shadow-primary/10">
+                <a 
+                  href="https://x.com/FCSchoolsGA" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group w-10 h-10 rounded-xl bg-gradient-to-br from-muted/50 to-muted border border-border/50 flex items-center justify-center transition-all hover:scale-110 hover:shadow-lg hover:shadow-primary/10"
+                  aria-label="Follow us on X (Twitter)"
+                >
                   <Twitter className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                </button>
+                </a>
                 <a 
                   href="mailto:forsyth-games@schoolcancelled.today" 
                   className="group w-10 h-10 rounded-xl bg-gradient-to-br from-muted/50 to-muted border border-border/50 flex items-center justify-center transition-all hover:scale-110 hover:shadow-lg hover:shadow-primary/10"
@@ -117,13 +112,6 @@ export function Footer() {
                 >
                   <div className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors" />
                   <span className="group-hover:translate-x-1 transition-transform">Settings</span>
-                </Link>
-                <Link 
-                  href="/about" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-all duration-200 flex items-center gap-3 group py-2 px-3 rounded-lg hover:bg-primary/5"
-                >
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors" />
-                  <span className="group-hover:translate-x-1 transition-transform">About</span>
                 </Link>
               </div>
             </motion.div>
@@ -216,10 +204,16 @@ export function Footer() {
               </div>
               
               <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 backdrop-blur-sm hover:shadow-lg hover:shadow-primary/10 transition-all">
+                <a 
+                  href="https://www.cloudflare.com/" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 backdrop-blur-sm hover:shadow-lg hover:shadow-primary/10 transition-all cursor-pointer"
+                  aria-label="Protected by Cloudflare"
+                >
                   <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse shadow-lg shadow-green-500/50" />
                   <span className="text-xs text-primary font-semibold">Protected</span>
-                </div>
+                </a>
                 <span className="text-xs text-muted-foreground text-center px-3 py-1 rounded-full bg-muted/20">
                   © {currentYear} Forsyth Games Portal
                 </span>

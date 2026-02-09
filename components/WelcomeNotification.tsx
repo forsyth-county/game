@@ -2,27 +2,21 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import { X } from 'lucide-react'
+import { X, Share2, Check } from 'lucide-react'
 
 export function WelcomeNotification() {
   const [isVisible, setIsVisible] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     // Check if user has already seen the notification in this session
-    const hasSeenWelcome = sessionStorage.getItem('hasSeenWelcome')
+    const hasSeenShare = sessionStorage.getItem('hasSeenShare')
     
-    if (!hasSeenWelcome) {
+    if (!hasSeenShare) {
       // Show notification after a short delay
       const showTimer = setTimeout(() => {
         setIsVisible(true)
-        sessionStorage.setItem('hasSeenWelcome', 'true')
-        
-        // Auto-hide after 3 seconds
-        const hideTimer = setTimeout(() => {
-          setIsVisible(false)
-        }, 3000)
-        
-        return () => clearTimeout(hideTimer)
+        sessionStorage.setItem('hasSeenShare', 'true')
       }, 1000)
       
       return () => clearTimeout(showTimer)
@@ -31,6 +25,16 @@ export function WelcomeNotification() {
 
   const handleClose = () => {
     setIsVisible(false)
+  }
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.origin)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
   }
 
   return (
@@ -52,42 +56,55 @@ export function WelcomeNotification() {
               {/* Subtle glow effect */}
               <div className="absolute inset-0 rounded-xl xs:rounded-2xl bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
               
-              <div className="relative flex items-center justify-between gap-2 xs:gap-3 sm:gap-4">
-                <div className="flex items-center gap-2 xs:gap-3">
-                  {/* Enhanced avatar with glow */}
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-                    <div className="relative w-8 h-8 xs:w-10 xs:h-10 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center ring-2 ring-white/20">
-                      <span className="text-sm xs:text-lg">👋</span>
+              <div className="relative">
+                <div className="flex items-center justify-between gap-2 xs:gap-3 sm:gap-4 mb-3">
+                  <div className="flex items-center gap-2 xs:gap-3">
+                    {/* Enhanced avatar with glow */}
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                      <div className="relative w-8 h-8 xs:w-10 xs:h-10 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center ring-2 ring-white/20">
+                        <Share2 className="w-4 h-4 xs:w-5 xs:h-5 text-white" />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm xs:text-base sm:text-lg font-bold text-foreground bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+                        Share with Friends!
+                      </h3>
+                      <p className="text-xs xs:text-sm text-muted-foreground/80">Share this site with your friends</p>
                     </div>
                   </div>
                   
-                  <div>
-                    <h3 className="text-sm xs:text-base sm:text-lg font-bold text-foreground bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                      Hello!
-                    </h3>
-                    <p className="text-xs xs:text-sm text-muted-foreground/80">Good to see you again</p>
-                  </div>
+                  {/* Enhanced close button */}
+                  <button
+                    onClick={handleClose}
+                    className="relative p-1.5 xs:p-2 rounded-xl hover:bg-white/10 dark:hover:bg-black/20 transition-all duration-200 group/close"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl opacity-0 group-hover/close:opacity-100 transition-opacity duration-200"></div>
+                    <X className="relative w-3 h-3 xs:w-4 xs:h-4 text-muted-foreground group-hover/close:text-foreground transition-colors duration-200" />
+                  </button>
                 </div>
                 
-                {/* Enhanced close button */}
+                {/* Copy button */}
                 <button
-                  onClick={handleClose}
-                  className="relative p-1.5 xs:p-2 rounded-xl hover:bg-white/10 dark:hover:bg-black/20 transition-all duration-200 group/close"
+                  onClick={handleCopy}
+                  disabled={copied}
+                  className="w-full relative p-2.5 xs:p-3 rounded-lg bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 transition-all duration-200 group/copy disabled:opacity-75"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl opacity-0 group-hover/close:opacity-100 transition-opacity duration-200"></div>
-                  <X className="relative w-3 h-3 xs:w-4 xs:h-4 text-muted-foreground group-hover/close:text-foreground transition-colors duration-200" />
+                  <div className="flex items-center justify-center gap-2">
+                    {copied ? (
+                      <>
+                        <Check className="w-4 h-4 text-white" />
+                        <span className="text-xs xs:text-sm font-semibold text-white">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Share2 className="w-4 h-4 text-white" />
+                        <span className="text-xs xs:text-sm font-semibold text-white">Copy Link</span>
+                      </>
+                    )}
+                  </div>
                 </button>
-              </div>
-              
-              {/* Progress bar for auto-hide */}
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: '100%' }}
-                  animate={{ width: '0%' }}
-                  transition={{ duration: 3, ease: 'linear' }}
-                  className="h-full bg-gradient-to-r from-secondary to-primary opacity-50"
-                />
               </div>
             </div>
           </div>

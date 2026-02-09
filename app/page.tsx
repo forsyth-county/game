@@ -7,7 +7,7 @@ import { games } from '@/data/games'
 import { GameCard } from '@/components/GameCard'
 import { Footer } from '@/components/Footer'
 import { BookmarkNotification } from '@/components/BookmarkNotification'
-import { RatingPopup } from '@/components/RatingPopup'
+
 import { WelcomeNotification } from '@/components/WelcomeNotification'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -44,7 +44,6 @@ export default function Home() {
       <GridBackground />
       <WelcomeNotification />
       <BookmarkNotification />
-      <RatingPopup />
       
       {/* Hero Section - Redesigned */}
       <motion.section

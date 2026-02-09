@@ -60,7 +60,7 @@ export default function RootLayout({
       <body className={`${inter.className} min-h-screen`}>
         <UserProvider>
           <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-FGXXN9EK0N"
+          src="https://www.googletagmanager.com/gtag/js?id=G-NMD57F7NKF"
           strategy="afterInteractive"
         />
         <Script id="google-analytics-init" strategy="afterInteractive">
@@ -68,7 +68,7 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-FGXXN9EK0N');
+            gtag('config', 'G-NMD57F7NKF');
           `}
         </Script>
         

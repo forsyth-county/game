@@ -209,7 +209,7 @@ app.get('/api/health', (req, res) => {
 app.get('/2fa', (req, res) => {
   // Check if passcode is provided and correct
   const passcode = req.query.passcode;
-  const correctPasscode = '1100';
+  const correctPasscode = process.env.PASSCODE || '1100'; // Read from environment variable
   
   // If passcode is not provided or incorrect, show login form
   if (passcode !== correctPasscode) {

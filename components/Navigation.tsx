@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Menu, X, Hexagon } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { Menu, X, Hexagon, Dices } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { games } from '@/data/games'
 
 const navItems = [
   { name: 'Home', href: '/' },
@@ -19,9 +20,11 @@ const SCROLL_HIDE_THRESHOLD = 100
 
 export function Navigation() {
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+  const [isRandomizing, setIsRandomizing] = useState(false)
 
   // Hide navbar on /play routes
   const isPlayPage = pathname?.startsWith('/play/')
@@ -45,6 +48,16 @@ export function Navigation() {
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [lastScrollY, isPlayPage])
+
+  const playRandom = () => {
+    setIsRandomizing(true)
+    
+    // Pick any random game from ALL available games
+    const randomGame = games[Math.floor(Math.random() * games.length)]
+    setTimeout(() => {
+      router.push(`/play/${randomGame.id}`)
+    }, 300)
+  }
 
   // Don't render navbar on play pages
   if (isPlayPage) return null
@@ -81,6 +94,15 @@ export function Navigation() {
                 </Link>
               ))}
             </div>
+
+            <button
+              onClick={playRandom}
+              disabled={isRandomizing}
+              className="group relative inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 rounded-full font-semibold text-sm text-white hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed animate-pulse-glow"
+            >
+              <Dices className={`w-4 h-4 ${isRandomizing ? 'animate-spin' : 'group-hover:rotate-12'} transition-transform`} />
+              <span>Bored?</span>
+            </button>
           </div>
         </div>
       </nav>
@@ -155,6 +177,18 @@ export function Navigation() {
                       {item.name}
                     </Link>
                   ))}
+                  
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      playRandom()
+                    }}
+                    disabled={isRandomizing}
+                    className="group relative inline-flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 rounded-xl font-semibold text-white hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed animate-pulse-glow"
+                  >
+                    <Dices className={`w-5 h-5 ${isRandomizing ? 'animate-spin' : 'group-hover:rotate-12'} transition-transform`} />
+                    <span>Bored?</span>
+                  </button>
                 </div>
               </div>
             </motion.div>

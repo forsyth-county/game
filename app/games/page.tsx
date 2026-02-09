@@ -66,7 +66,7 @@ export default function GamesPage() {
           <span className="text-gradient">Educational Games</span>
         </h1>
         <p className="text-muted-foreground text-lg">
-          Browse our collection of {games.length} educational learning activities
+          Browse our collection of 100+ educational learning activities
         </p>
         <p className="text-yellow-500/80 font-medium">
           📚 Educational Learning Platform - Use Responsibly

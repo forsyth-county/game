@@ -7,7 +7,7 @@ import { games } from '@/data/games'
 import { GameCard } from '@/components/GameCard'
 import { Footer } from '@/components/Footer'
 import { BookmarkNotification } from '@/components/BookmarkNotification'
-import { RatingPopup } from '@/components/RatingPopup'
+
 import { WelcomeNotification } from '@/components/WelcomeNotification'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -44,7 +44,6 @@ export default function Home() {
       <GridBackground />
       <WelcomeNotification />
       <BookmarkNotification />
-      <RatingPopup />
       
       {/* Hero Section - Redesigned */}
       <motion.section
@@ -183,17 +182,34 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
-          {featuredByCategory.map((game, index) => (
-            <motion.div
-              key={game.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.2 + index * 0.1, duration: 0.4 }}
-            >
-              <GameCard game={game} />
-            </motion.div>
-          ))}
+        <div className="overflow-hidden relative">
+          {/* Auto-scrolling carousel container */}
+          <div className="flex gap-6 animate-scroll">
+            {/* First set of games */}
+            {featuredByCategory.map((game, index) => (
+              <motion.div
+                key={`first-${game.id}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2 + index * 0.1, duration: 0.4 }}
+                className="flex-shrink-0 w-80"
+              >
+                <GameCard game={game} />
+              </motion.div>
+            ))}
+            {/* Duplicate set for seamless loop */}
+            {featuredByCategory.map((game, index) => (
+              <motion.div
+                key={`second-${game.id}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2 + index * 0.1, duration: 0.4 }}
+                className="flex-shrink-0 w-80"
+              >
+                <GameCard game={game} />
+              </motion.div>
+            ))}
+          </div>
         </div>
 
         <motion.div

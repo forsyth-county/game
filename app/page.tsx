@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Sparkles, Dices, Zap, Shield, BookOpen, Gamepad2, Trophy, Star, TrendingUp } from 'lucide-react'
+import { Sparkles, Dices, Zap, Shield, BookOpen, Gamepad2, Trophy, Star, TrendingUp, Clock } from 'lucide-react'
 import { editorsPicks } from '@/data/editors-picks'
 import { games } from '@/data/games'
 import { GameCard } from '@/components/GameCard'
@@ -10,14 +10,41 @@ import { BookmarkNotification } from '@/components/BookmarkNotification'
 
 import { WelcomeNotification } from '@/components/WelcomeNotification'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { GridBackground } from '@/components/ui/grid-background-demo'
 import { useUser } from '@/lib/userContext'
+import { 
+  getPersonalizedRecommendations, 
+  getRecentlyPlayedGames, 
+  hasPlayHistory 
+} from '@/lib/gameTracking'
 
 export default function Home() {
   const router = useRouter()
   const [isRandomizing, setIsRandomizing] = useState(false)
   const { userName, isLoaded } = useUser()
+  const [userHasHistory, setUserHasHistory] = useState(false)
+  const [recentGames, setRecentGames] = useState<typeof games>([])
+  const [recommendedGames, setRecommendedGames] = useState<typeof games>([])
+
+  useEffect(() => {
+    // Check if user has play history
+    const hasHistory = hasPlayHistory()
+    setUserHasHistory(hasHistory)
+
+    if (hasHistory) {
+      // Get recently played games
+      const recentPlays = getRecentlyPlayedGames(6)
+      const recentGamesList = recentPlays
+        .map(play => games.find(g => g.id === play.gameId))
+        .filter((g): g is typeof games[0] => g !== undefined)
+      setRecentGames(recentGamesList)
+
+      // Get personalized recommendations
+      const recommendations = getPersonalizedRecommendations(games, 12)
+      setRecommendedGames(recommendations)
+    }
+  }, [])
 
   const playRandom = () => {
     setIsRandomizing(true)
@@ -29,7 +56,7 @@ export default function Home() {
     }, 300)
   }
 
-  // Get featured games by category
+  // Get featured games by category (fallback for users without history)
   const featuredByCategory = [
     { id: 'slope', name: 'Slope', category: 'RACING', iconUrl: '/games/slope/favicon.png', iframeSrc: '/games/slope/' },
     { id: '1v1lol', name: '1v1.LOL', category: 'ACTION', iconUrl: '/games/1v1lol/favicon.png', iframeSrc: '/games/1v1lol/' },
@@ -38,6 +65,11 @@ export default function Home() {
     { id: 'monkey-mart', name: 'Monkey Mart', category: 'ADVENTURE', iconUrl: '/games/monkey-mart/favicon.png', iframeSrc: '/games/monkey-mart/' },
     { id: 'stumble-guys', name: 'Stumble Guys', category: 'PLATFORMER', iconUrl: '/games/stumble-guys/favicon.png', iframeSrc: '/games/stumble-guys/' },
   ]
+
+  // Display games: use recommendations if available, otherwise use featured
+  const displayGames = userHasHistory && recommendedGames.length > 0 
+    ? recommendedGames 
+    : featuredByCategory
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
@@ -128,6 +160,47 @@ export default function Home() {
         </motion.p>
       </motion.section>
 
+      {/* Recently Played Section - Only show if user has history */}
+      {userHasHistory && recentGames.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.6 }}
+          className="space-y-6 py-4"
+        >
+          <div className="text-center space-y-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.9, duration: 0.6 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-semibold"
+            >
+              <Clock className="w-4 h-4" />
+              <span>Recently Played</span>
+            </motion.div>
+            <h2 className="text-4xl md:text-5xl font-bold">
+              <span className="text-gradient">Pick Up Where You Left Off</span>
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Jump back into your recently played games
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+            {recentGames.map((game, index) => (
+              <motion.div
+                key={game.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.0 + index * 0.1, duration: 0.4 }}
+              >
+                <GameCard game={game} className="w-full" />
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+      )}
+
       {/* Value Proposition Section */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
@@ -157,7 +230,7 @@ export default function Home() {
         ))}
       </motion.section>
 
-      {/* Featured Games Grid */}
+      {/* Featured/Recommended Games Grid */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
@@ -172,13 +245,18 @@ export default function Home() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/10 border border-secondary/20 text-secondary text-sm font-semibold"
           >
             <TrendingUp className="w-4 h-4" />
-            <span>Trending Now</span>
+            <span>{userHasHistory ? 'Personalized For You' : 'Trending Now'}</span>
           </motion.div>
           <h2 className="text-4xl md:text-5xl font-bold">
-            <span className="text-gradient">Popular Games</span>
+            <span className="text-gradient">
+              {userHasHistory ? 'Recommended For You' : 'Popular Games'}
+            </span>
           </h2>
           <p className="text-muted-foreground text-lg">
-            Jump into the most-played games on Forsyth — from action-packed to brain-teasing
+            {userHasHistory 
+              ? 'Based on your gaming preferences and play history'
+              : 'Jump into the most-played games on Forsyth — from action-packed to brain-teasing'
+            }
           </p>
         </div>
 
@@ -186,7 +264,7 @@ export default function Home() {
           {/* Auto-scrolling carousel container */}
           <div className="flex gap-6 animate-scroll">
             {/* First set of games */}
-            {featuredByCategory.map((game, index) => (
+            {displayGames.map((game, index) => (
               <motion.div
                 key={`first-${game.id}`}
                 initial={{ opacity: 0, y: 20 }}
@@ -198,7 +276,7 @@ export default function Home() {
               </motion.div>
             ))}
             {/* Duplicate set for seamless loop */}
-            {featuredByCategory.map((game, index) => (
+            {displayGames.map((game, index) => (
               <motion.div
                 key={`second-${game.id}`}
                 initial={{ opacity: 0, y: 20 }}

@@ -207,7 +207,7 @@ export function Footer() {
                 >
                   <Heart className="w-5 h-5 text-red-500 fill-red-500 animate-pulse cursor-pointer" />
                 </a>
-                <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-semibold">by the Weather Man</span>
+                <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-semibold">by James 🙂 </span>
               </div>
               
               <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">

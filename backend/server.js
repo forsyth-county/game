@@ -4,6 +4,7 @@ const helmet = require('helmet');
 require('dotenv').config();
 const { connectDB, getDB } = require('./db');
 const twoFA = require('./twoFactorAuth');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -18,7 +19,27 @@ app.use(helmet({
       imgSrc: ["'self'", "data:", "https:"],
     },
   },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  },
+  frameguard: {
+    action: 'deny'
+  },
+  noSniff: true,
+  xssFilter: true
 }));
+
+// Additional security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  next();
+});
 
 // CORS configuration
 app.use(cors({
@@ -36,8 +57,41 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Apply basic rate limiting to all routes
-// app.use(generalLimit);
+// Rate limiters for different endpoint types
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 authentication attempts per windowMs
+  message: 'Too many authentication attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const adminLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 10, // Limit admin actions to 10 per minute
+  message: 'Too many admin requests, please slow down.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply general rate limiting to all routes
+app.use('/api/', generalLimiter);
+
+// Request logging middleware
+app.use((req, res, next) => {
+  const timestamp = new Date().toISOString();
+  const ip = req.ip || req.connection.remoteAddress;
+  console.log(`[${timestamp}] ${req.method} ${req.path} - IP: ${ip}`);
+  next();
+});
 
 // In-memory cache for announcements (backed by MongoDB)
 let announcementCache = {
@@ -75,8 +129,8 @@ app.get('/api/announcements', async (req, res) => {
 
 // POST /api/announcements - Create/update announcement (protected endpoint)
 app.post('/api/announcements', 
+  adminLimiter,
   // authenticateApiKey,
-  // adminLimit,
   // validateAnnouncement,
   // filterAndSanitize,
   async (req, res) => {
@@ -122,8 +176,8 @@ app.post('/api/announcements',
 
 // DELETE /api/announcements - Disable current announcement (protected endpoint)
 app.delete('/api/announcements', 
+  adminLimiter,
   // authenticateApiKey,
-  // adminLimit,
   async (req, res) => {
     try {
       const db = getDB();
@@ -271,11 +325,13 @@ app.get('/api/2fa/current', (req, res) => {
 });
 
 // POST /api/2fa/verify - Verify a 2FA code
-app.post('/api/2fa/verify', (req, res) => {
+app.post('/api/2fa/verify', authLimiter, (req, res) => {
   const { code, token } = req.body;
   const codeToVerify = code || token;
+  const clientIP = req.ip || req.connection.remoteAddress;
   
   if (!codeToVerify) {
+    console.warn(`[SECURITY] 2FA verification failed - No code provided from IP: ${clientIP}`);
     return res.status(400).json({
       success: false,
       error: 'Code is required'
@@ -285,12 +341,14 @@ app.post('/api/2fa/verify', (req, res) => {
   const isValid = twoFA.verifyCode(codeToVerify);
   
   if (isValid) {
+    console.log(`[SECURITY] ✅ 2FA verification successful from IP: ${clientIP}`);
     res.json({
       success: true,
       message: '2FA verification successful',
       verified: true
     });
   } else {
+    console.warn(`[SECURITY] ❌ 2FA verification failed - Invalid code from IP: ${clientIP}`);
     res.status(401).json({
       success: false,
       message: 'Invalid 2FA code',

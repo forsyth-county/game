@@ -8,6 +8,7 @@ import { games } from '@/data/games'
 import { utilities } from '@/data/utilities'
 import { Game, Utility } from '@/lib/types'
 import { withBasePath } from '@/lib/utils'
+import { trackGamePlay } from '@/lib/gameTracking'
 
 interface PlayPageClientProps {
   slug: string
@@ -23,6 +24,11 @@ export default function PlayPageClient({ slug }: PlayPageClientProps) {
     const game = games.find(g => g.id === slug)
     const utility = utilities.find(u => u.id === slug)
     setItem(game || utility || null)
+    
+    // Track game play (only for games, not utilities)
+    if (game) {
+      trackGamePlay(game.id)
+    }
   }, [slug])
 
   const handleFullscreen = () => {

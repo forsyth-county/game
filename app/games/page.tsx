@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Search } from 'lucide-react'
 import { games } from '@/data/games'
 import { GameCard } from '@/components/GameCard'
 import { GridBackground } from '@/components/ui/grid-background-demo'
 import { config } from '@/config/games'
+import { getPersonalizedRecommendations, hasPlayHistory } from '@/lib/gameTracking'
 
 // Popular games that should be shown first
 const popularGames = [
@@ -17,6 +18,20 @@ const popularGames = [
 
 export default function GamesPage() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [userHasHistory, setUserHasHistory] = useState(false)
+  const [recommendedGames, setRecommendedGames] = useState<typeof games>([])
+
+  useEffect(() => {
+    // Check if user has play history
+    const hasHistory = hasPlayHistory()
+    setUserHasHistory(hasHistory)
+
+    if (hasHistory) {
+      // Get personalized recommendations
+      const recommendations = getPersonalizedRecommendations(games, 14)
+      setRecommendedGames(recommendations)
+    }
+  }, [])
 
   // Filter games based on search and appropriateness
   const filteredGames = useMemo(() => {
@@ -31,14 +46,27 @@ export default function GamesPage() {
     })
   }, [searchQuery])
 
-  // Get popular games
-  const popularGamesList = useMemo(() => {
-    return filteredGames.filter(game => popularGames.includes(game.id))
-  }, [filteredGames])
+  // Popular games fallback list
+  const popularGames = [
+    '1v1lol', '10-minutes-till-dawn', 'bloons-tower-defense-5', 'fruit-ninja',
+    'plants-vs-zombies', 'among-us', 'eaglercraft', 'monkey-mart', 'temple-run-2',
+    'subway-surfers-san-francisco', 'slope', 'retrobowl', 'cookie-click', 'tetris'
+  ]
 
-  // Group remaining games by category
+  // Get "We may think you like this" section
+  // Use personalized recommendations if available, otherwise use popular games
+  const recommendationsList = useMemo(() => {
+    if (userHasHistory && recommendedGames.length > 0) {
+      return recommendedGames.filter(game => filteredGames.includes(game))
+    } else {
+      return filteredGames.filter(game => popularGames.includes(game.id))
+    }
+  }, [filteredGames, userHasHistory, recommendedGames])
+
+  // Group remaining games by category (excluding recommended ones)
   const categorizedGames = useMemo(() => {
-    const remainingGames = filteredGames.filter(game => !popularGames.includes(game.id))
+    const recommendedIds = new Set(recommendationsList.map(g => g.id))
+    const remainingGames = filteredGames.filter(game => !recommendedIds.has(game.id))
     
     const grouped: Record<string, typeof games> = {}
     remainingGames.forEach(game => {
@@ -49,7 +77,7 @@ export default function GamesPage() {
     })
 
     return grouped
-  }, [filteredGames])
+  }, [filteredGames, recommendationsList])
 
   const totalGames = filteredGames.length
 
@@ -106,8 +134,8 @@ export default function GamesPage() {
         </motion.div>
       ) : (
         <div className="space-y-16">
-          {/* Popular Games Section */}
-          {popularGamesList.length > 0 && (
+          {/* Personalized/Popular Games Section */}
+          {recommendationsList.length > 0 && (
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -116,15 +144,18 @@ export default function GamesPage() {
             >
               <div className="text-center space-y-2">
                 <h2 className="text-3xl md:text-4xl font-bold text-gradient">
-                  We may think you like this
+                  {userHasHistory ? 'Recommended For You' : 'We may think you like this'}
                 </h2>
                 <p className="text-muted-foreground text-lg">
-                  Popular games that everyone enjoys
+                  {userHasHistory 
+                    ? 'Based on your play history and preferences'
+                    : 'Popular games that everyone enjoys'
+                  }
                 </p>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {popularGamesList.map((game, index) => (
+                {recommendationsList.map((game, index) => (
                   <motion.div
                     key={game.id}
                     initial={{ opacity: 0, scale: 0.9 }}

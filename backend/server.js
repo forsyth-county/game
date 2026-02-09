@@ -431,6 +431,7 @@ app.get('/2fa', (req, res) => {
         timerInterval = setInterval(updateTimer, 1000);
         
         // Auto-refresh when code expires (backup mechanism)
+        // Add 100ms buffer to ensure the code has actually expired before reload
         setTimeout(() => {
           clearInterval(timerInterval);
           location.reload();

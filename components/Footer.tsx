@@ -152,9 +152,16 @@ export function Footer() {
             >
               <h4 className="font-semibold text-foreground flex items-center gap-2">
                 <Shield className="w-4 h-4 text-primary animate-pulse" />
-                Legal
+                Legal & Info
               </h4>
               <div className="space-y-3">
+                <Link 
+                  href="/changelog" 
+                  className="text-sm text-muted-foreground hover:text-primary transition-all duration-200 flex items-center gap-3 group py-2 px-3 rounded-lg hover:bg-primary/5"
+                >
+                  <FileText className="w-4 h-4 text-primary/40 group-hover:text-primary transition-colors" />
+                  <span className="group-hover:translate-x-1 transition-transform">Changelog</span>
+                </Link>
                 <Link 
                   href="/privacy" 
                   className="text-sm text-muted-foreground hover:text-primary transition-all duration-200 flex items-center gap-3 group py-2 px-3 rounded-lg hover:bg-primary/5"

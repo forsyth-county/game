@@ -47,10 +47,10 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Rate limiters for different endpoint types
+// Rate limiters for different endpoint types - Very generous limits
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500, // Limit each IP to 500 requests per windowMs (increased from 100)
+  max: 5000, // Limit each IP to 5000 requests per windowMs (very generous)
   message: 'Rate limit exceeded. Please wait a moment.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -58,7 +58,7 @@ const generalLimiter = rateLimit({
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Limit each IP to 20 authentication attempts per windowMs (increased from 5)
+  max: 100, // Limit each IP to 100 authentication attempts per windowMs (very generous)
   message: 'Too many authentication attempts, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -66,7 +66,7 @@ const authLimiter = rateLimit({
 
 const adminLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 30, // Limit admin actions to 30 per minute (increased from 10)
+  max: 200, // Limit admin actions to 200 per minute (very generous)
   message: 'Too many admin requests, please slow down.',
   standardHeaders: true,
   legacyHeaders: false,

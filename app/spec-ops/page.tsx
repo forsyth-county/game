@@ -77,6 +77,14 @@ export default function AdminPage() {
   const [liveVisits, setLiveVisits] = useState<any[]>([])
   const [isLiveMode, setIsLiveMode] = useState(true)
 
+  // 2FA state
+  const [requires2FA, setRequires2FA] = useState(false)
+  const [twoFACode, setTwoFACode] = useState('')
+  const [twoFAError, setTwoFAError] = useState('')
+  const [current2FACode, setCurrent2FACode] = useState('')
+  const [codeExpiresIn, setCodeExpiresIn] = useState(30)
+  const [passwordVerified, setPasswordVerified] = useState(false)
+
   // Fetch real visitor analytics from backend
   useEffect(() => {
     if (!isAuthenticated) return
@@ -123,6 +131,30 @@ export default function AdminPage() {
     
     return () => clearInterval(interval)
   }, [isAuthenticated, isLiveMode])
+
+  // Fetch current 2FA code every second when on 2FA screen
+  useEffect(() => {
+    if (!requires2FA || isAuthenticated) return
+
+    const fetch2FACode = async () => {
+      try {
+        const response = await fetch('https://portal-t795.onrender.com/api/2fa/current')
+        if (!response.ok) throw new Error('Failed to fetch 2FA code')
+        const data = await response.json()
+        setCurrent2FACode(data.code)
+        setCodeExpiresIn(data.secondsRemaining)
+      } catch (err) {
+        console.error('Error fetching 2FA code:', err)
+      }
+    }
+
+    // Initial fetch
+    fetch2FACode()
+
+    // Update every second
+    const interval = setInterval(fetch2FACode, 1000)
+    return () => clearInterval(interval)
+  }, [requires2FA, isAuthenticated])
 
   // Update rate limit countdown every second
   useEffect(() => {
@@ -183,16 +215,22 @@ export default function AdminPage() {
       // Check if already authenticated this session
       const authSession = sessionStorage.getItem('forsyth-admin-auth')
       const sessionTime = sessionStorage.getItem('forsyth-admin-time')
+      const twoFAVerified = sessionStorage.getItem('forsyth-admin-2fa-verified')
       
-      if (authSession === 'true' && sessionTime) {
+      if (authSession === 'true' && sessionTime && twoFAVerified === 'true') {
         const sessionAge = Date.now() - parseInt(sessionTime)
         if (sessionAge < SESSION_TIMEOUT) {
           setIsAuthenticated(true)
         } else {
-          // Session expired
+          // Session expired - clear all auth data
           sessionStorage.removeItem('forsyth-admin-auth')
           sessionStorage.removeItem('forsyth-admin-time')
+          sessionStorage.removeItem('forsyth-admin-2fa-verified')
         }
+      } else if (authSession === 'true' && !twoFAVerified) {
+        // Auth without 2FA - invalid session, clear it
+        sessionStorage.removeItem('forsyth-admin-auth')
+        sessionStorage.removeItem('forsyth-admin-time')
       }
 
       // Check login attempts
@@ -241,6 +279,7 @@ export default function AdminPage() {
           setIsAuthenticated(false)
           sessionStorage.removeItem('forsyth-admin-auth')
           sessionStorage.removeItem('forsyth-admin-time')
+          sessionStorage.removeItem('forsyth-admin-2fa-verified')
         }
       }
     }, 60000) // Check every minute
@@ -272,16 +311,14 @@ export default function AdminPage() {
     const passcodeHash = await SecurityUtils.hashPassword(passcode)
     
     if (passcodeHash === ADMIN_PASSCODE_HASH) {
-      // Successful login
-      setIsAuthenticated(true)
-      sessionStorage.setItem('forsyth-admin-auth', 'true')
-      sessionStorage.setItem('forsyth-admin-time', Date.now().toString())
+      // Password verified - now require 2FA
+      setPasswordVerified(true)
+      setRequires2FA(true)
       setPasscodeError('')
-      setLoginAttempts(0)
-      localStorage.removeItem('forsyth-admin-attempts')
+      setPasscode('')
       
-      // Log successful login attempt (in production, send to security monitoring)
-      console.log('Admin login successful from:', userIP)
+      // Log password verification (in production, send to security monitoring)
+      console.log('Password verified for admin from:', userIP, '- Awaiting 2FA')
     } else {
       // Failed login
       const remainingAttempts = MAX_LOGIN_ATTEMPTS - newAttempts
@@ -301,6 +338,69 @@ export default function AdminPage() {
       }
       
       setPasscode('')
+    }
+  }
+
+  const handle2FASubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!twoFACode.trim()) {
+      setTwoFAError('Please enter the 2FA code')
+      return
+    }
+
+    try {
+      // Verify 2FA code with backend
+      const response = await fetch('https://portal-t795.onrender.com/api/2fa/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code: twoFACode })
+      })
+
+      const data = await response.json()
+
+      if (data.success && data.verified) {
+        // Successful 2FA verification - grant full access
+        setIsAuthenticated(true)
+        sessionStorage.setItem('forsyth-admin-auth', 'true')
+        sessionStorage.setItem('forsyth-admin-time', Date.now().toString())
+        sessionStorage.setItem('forsyth-admin-2fa-verified', 'true')
+        setTwoFAError('')
+        setTwoFACode('')
+        setLoginAttempts(0)
+        setRequires2FA(false)
+        localStorage.removeItem('forsyth-admin-attempts')
+        
+        // Log successful 2FA verification
+        console.log('2FA verified - Admin access granted from:', userIP)
+      } else {
+        // Failed 2FA verification
+        const newAttempts = loginAttempts + 1
+        setLoginAttempts(newAttempts)
+        
+        if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
+          // Lockout after too many 2FA failures
+          const lockoutEnd = Date.now() + LOCKOUT_DURATION
+          setIsLockedOut(true)
+          setLockoutEndTime(lockoutEnd)
+          localStorage.setItem('forsyth-admin-lockout', lockoutEnd.toString())
+          setTwoFAError(`Too many failed 2FA attempts. Locked for ${LOCKOUT_DURATION / 60000} minutes.`)
+          setRequires2FA(false)
+          setPasswordVerified(false)
+          
+          console.warn('2FA lockout triggered from:', userIP)
+        } else {
+          setTwoFAError(`Invalid 2FA code. ${MAX_LOGIN_ATTEMPTS - newAttempts} attempts remaining.`)
+        }
+        
+        setTwoFACode('')
+      }
+    } catch (error) {
+      console.error('2FA verification error:', error)
+      setTwoFAError('Failed to verify 2FA code. Backend may be offline.')
+      setTwoFACode('')
     }
   }
 
@@ -376,6 +476,113 @@ export default function AdminPage() {
 
   // Passcode screen
   if (!isAuthenticated) {
+    // Show 2FA screen if password is verified
+    if (requires2FA && passwordVerified) {
+      return (
+        <div className="min-h-[80vh] flex items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="glass rounded-2xl border border-border p-8 max-w-md w-full mx-4"
+          >
+            <div className="text-center space-y-4 mb-8">
+              <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto">
+                <Shield className="w-8 h-8 text-green-400" />
+              </div>
+              <h1 className="text-2xl font-bold text-foreground">Two-Factor Authentication</h1>
+              <p className="text-muted-foreground text-sm">
+                Enter the current 2FA code from the backend
+              </p>
+              
+              {/* Display current code info (for reference - user should check backend) */}
+              <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
+                <p className="text-xs text-muted-foreground mb-2">
+                  Visit <a href="https://portal-t795.onrender.com/2fa" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">portal-t795.onrender.com/2fa</a> for current code
+                </p>
+                <div className="flex items-center justify-center gap-3">
+                  <div className="text-2xl font-mono font-bold text-primary tracking-wider">
+                    ••••••
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+                    <span className="text-xs text-muted-foreground mt-1">{codeExpiresIn}s</span>
+                  </div>
+                </div>
+                <p className="text-xs text-yellow-400 mt-2">
+                  🔒 Code refreshes every 30 seconds
+                </p>
+              </div>
+
+              {/* Security Status */}
+              <div className="space-y-2 text-xs">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-400"></div>
+                  <span className="text-green-400">Password Verified</span>
+                </div>
+                <div className="text-muted-foreground">
+                  IP: {userIP || 'Detecting...'}
+                </div>
+                {loginAttempts > 0 && (
+                  <div className="text-orange-400">
+                    2FA Attempts: {loginAttempts}/{MAX_LOGIN_ATTEMPTS}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <form onSubmit={handle2FASubmit} className="space-y-4">
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={twoFACode}
+                  onChange={(e) => setTwoFACode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="Enter 6-digit code"
+                  maxLength={6}
+                  className="w-full px-4 py-3 bg-background/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground placeholder-muted-foreground text-center text-2xl tracking-[0.5em] font-mono"
+                  autoFocus
+                />
+                <AnimatePresence>
+                  {twoFAError && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="text-sm text-center text-red-400"
+                    >
+                      {twoFAError}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <button
+                type="submit"
+                disabled={twoFACode.length !== 6}
+                className="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Shield className="w-4 h-4" />
+                Verify 2FA Code
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setRequires2FA(false)
+                  setPasswordVerified(false)
+                  setTwoFACode('')
+                  setTwoFAError('')
+                }}
+                className="w-full px-6 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ← Back to Password
+              </button>
+            </form>
+          </motion.div>
+        </div>
+      )
+    }
+
+    // Show password screen
     return (
       <div className="min-h-[80vh] flex items-center justify-center">
         <motion.div

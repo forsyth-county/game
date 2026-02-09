@@ -22,16 +22,16 @@ const createRateLimit = (windowMs, max, message) => {
   });
 };
 
-// Different rate limits for different endpoints
+// Different rate limits for different endpoints - Extremely generous limits
 exports.generalLimit = createRateLimit(
-  1 * 60 * 1000, // 15 minutes
-  10000, // 100 requests per 15 minutes
-  'Too many requests from this IP, please try again later.'
+  15 * 60 * 1000, // 15 minutes (matching server.js general limiter)
+  50000, // 50000 requests per 15 minutes (extremely generous)
+  'Rate limit exceeded. Please wait a moment.'
 );
 
 exports.adminLimit = createRateLimit(
   60 * 1000, // 1 minute
-  20, // 20 admin actions per minute
+  500, // 500 admin actions per minute (extremely generous)
   'Too many admin actions, please slow down.'
 );
 

@@ -14,6 +14,7 @@ import { GeoLock } from '@/components/GeoLock'
 import { UserProvider } from '@/lib/userContext'
 import { MouseGradient } from '@/components/MouseGradient'
 import { VisitorTracker } from '@/components/VisitorTracker'
+import { GoogleAnalytics } from '@/components/GoogleAnalytics'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -63,14 +64,7 @@ export default function RootLayout({
           src="https://www.googletagmanager.com/gtag/js?id=G-FGXXN9EK0N"
           strategy="afterInteractive"
         />
-        <Script id="google-analytics-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-FGXXN9EK0N');
-          `}
-        </Script>
+        <GoogleAnalytics />
         
         <Script
           src="https://web3forms.com/client/script.js"

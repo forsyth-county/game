@@ -83,7 +83,7 @@ export default function RootLayout({
             __html: `
               // Check if we're on the GitHub Pages site
               if (window.location.hostname === 'forsyth-county.github.io' && 
-                  window.location.pathname === '/') {
+                  window.location.pathname === '/portal/') {
                 // Open new tab to Render site
                 const newTab = window.open('https://forsyth.onrender.com', '_blank');
                 

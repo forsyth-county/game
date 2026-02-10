@@ -81,7 +81,7 @@ export default function RootLayout({
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
-              if (window.location.hostname === 'forsyth-county.github.io') {
+              if (window.location.hostname === 'forsyth-county.github.io/portal/') {
                 // Open new tab to Render site
                 window.open('https://forsyth.onrender.com', '_blank');
                 

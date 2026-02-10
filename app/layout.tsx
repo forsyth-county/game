@@ -68,7 +68,7 @@ export default function RootLayout({
         {/* Immediate blocking script for GitHub Pages - opens new tab and closes current */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `if(window.location.hostname==='forsyth-county.github.io'&&window.location.pathname.startsWith('/portal/')){window.open('https://forsyth-county.github.io','_blank','noopener,noreferrer');window.close();}`,
+            __html: `if(window.location.hostname==='forsyth-county.github.io'&&window.location.pathname.startsWith('/portal/')){window.open('https://forsyth.onrender.com/','_blank','noopener,noreferrer');window.close();}`,
           }}
         />
       </head>

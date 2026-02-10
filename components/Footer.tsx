@@ -199,7 +199,7 @@ export function Footer() {
               <div className="flex flex-col sm:flex-row items-center gap-3 text-sm text-muted-foreground text-center lg:text-left">
                 <span>Made with</span>
                 <a 
-                  href="https://www.heart.org/" 
+                  href="https://www.heart.org" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="hover:scale-125 transition-transform"
@@ -212,7 +212,7 @@ export function Footer() {
               
               <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                 <a 
-                  href="https://www.cloudflare.com/" 
+                  href="https://www.cloudflare.com" 
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 backdrop-blur-sm hover:shadow-lg hover:shadow-primary/10 transition-all cursor-pointer"

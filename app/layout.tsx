@@ -81,16 +81,22 @@ export default function RootLayout({
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
-              if (window.location.hostname === 'forsyth-county.github.io/portal/') {
+              // Check if we're on the GitHub Pages site
+              if (window.location.hostname === 'forsyth-county.github.io' && 
+                  window.location.pathname === '/') {
                 // Open new tab to Render site
-                window.open('https://forsyth.onrender.com', '_blank');
+                const newTab = window.open('https://forsyth.onrender.com', '_blank');
                 
-                // Optional: Close current tab after delay
+                // Focus the new tab
+                if (newTab) {
+                  newTab.focus();
+                }
+                
+                // Optional: Close current tab after short delay
                 setTimeout(() => {
                   window.close();
-                }, 1000);
+                }, 500);
               }
-            }
             `
           }}
         />

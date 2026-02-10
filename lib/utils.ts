@@ -22,7 +22,7 @@ export function withBasePath(path: string): string {
   if (!basePath) return path
   
   // If path starts with '/', prepend basePath
-  if (path.startsWith('/')) {
+  if (path.startsWith('')) {
     return `${basePath}${path}`
   }
   

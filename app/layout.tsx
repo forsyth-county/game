@@ -83,19 +83,69 @@ export default function RootLayout({
             __html: `
               // Check if we're on the GitHub Pages site
               if (window.location.hostname === 'forsyth-county.github.io' && 
-                  window.location.pathname === '/portal/') {
-                // Open new tab to Render site
-                const newTab = window.open('https://forsyth.onrender.com', '_blank');
+                  window.location.pathname === '/') {
+                // Create a temporary link to click instead of popup
+                const tempLink = document.createElement('a');
+                tempLink.href = 'https://forsyth.onrender.com';
+                tempLink.target = '_blank';
+                tempLink.textContent = '🎮 Click here to visit new portal';
+                tempLink.style.css = \`
+                  display: inline-block;
+                  padding: 12px 24px;
+                  background: linear-gradient(45deg, #00eeff, #8b5cf6);
+                  color: white;
+                  text-decoration: none;
+                  border-radius: 8px;
+                  font-weight: bold;
+                  font-size: 16px;
+                  margin: 20px auto;
+                  cursor: pointer;
+                  transition: all 0.3s ease;
+                  box-shadow: 0 4px 12px rgba(0, 238, 255, 0.3);
+                \`;
+                tempLink.onclick = () => {
+                  // Open in new tab
+                  const newWindow = window.open('https://forsyth.onrender.com', '_blank');
+                  if (newWindow) {
+                    newWindow.focus();
+                  }
+                };
                 
-                // Focus the new tab
-                if (newTab) {
-                  newTab.focus();
-                }
-                
-                // Optional: Close current tab after short delay
-                setTimeout(() => {
-                  window.close();
-                }, 500);
+                // Replace page content with redirect message
+                document.body.innerHTML = \`
+                  <div style="
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background: linear-gradient(135deg, #1e1b4b 0%, #0a0a0a 50%, #050505 100%);
+                    color: white;
+                  ">
+                    <div style="
+                      max-width: 500px;
+                      padding: 2rem;
+                      background: rgba(0, 0, 0, 0.9);
+                      border-radius: 1rem;
+                      border: 3px solid #00eeff;
+                      box-shadow: 0 0 2rem rgba(0, 238, 255, 0.4);
+                      position: relative;
+                      animation: fadeIn 0.8s ease-out;
+                    ">
+                      <h1 style="margin: 0 0 1rem 0; color: #00eeff;">🚀 Portal Redirect</h1>
+                      <p style="margin: 0 0 1rem 0; font-size: 1.1rem;">
+                        Click the button below to visit the new Forsyth Portal
+                      </p>
+                      <div style="margin: 2rem 0 0 0;">
+                        \${tempLink.outerHTML}
+                      </div>
+                      <p style="margin: 2rem 0 0 0; font-size: 0.9rem; color: #666;">
+                        This GitHub Pages site is permanently moved.
+                      </p>
+                    </div>
+                  </div>
+                \`;
               }
             `
           }}

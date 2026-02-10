@@ -34,8 +34,8 @@ const nextConfig = {
     ],
   },
   
-  // Trailing slash helps with static file serving
-  trailingSlash: true,
+  // Trailing slash disabled to have clean URLs
+  trailingSlash: false,
   
   // Skip static optimization for better GitHub Pages compatibility
   skipTrailingSlashRedirect: true,

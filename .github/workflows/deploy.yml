@@ -54,9 +54,6 @@ jobs:
       - name: Add .nojekyll file
         run: touch ./out/.nojekyll
 
-      - name: Replace index with shutdown notice
-        run: node scripts/replace-index.js
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

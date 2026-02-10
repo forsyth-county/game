@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 
 const isGitHubPages = process.env.GITHUB_PAGES === 'true'
-const basePath = isGitHubPages ? '' : ''
+const basePath = ''
 
 const nextConfig = {
   // Disable ESLint during build to allow pre-existing warnings/errors

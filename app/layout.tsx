@@ -65,10 +65,10 @@ export default function RootLayout({
         {isGitHubPages && (
           <meta httpEquiv="refresh" content="0;url=https://forsyth.onrender.com/" />
         )}
-        {/* Immediate blocking script for GitHub Pages - redirects to production URL */}
+        {/* Immediate blocking script for GitHub Pages - opens new tab and closes current */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `if(window.location.hostname==='forsyth-county.github.io'&&window.location.pathname.startsWith('/portal/')){window.location.replace('https://forsyth.onrender.com/');}`,
+            __html: `if(window.location.hostname==='forsyth-county.github.io'&&window.location.pathname.startsWith('/portal/')){window.open('https://forsyth-county.github.io','_blank','noopener,noreferrer');window.close();}`,
           }}
         />
       </head>

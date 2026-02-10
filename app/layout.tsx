@@ -93,7 +93,6 @@ export default function RootLayout({
             </div>
           </div>
         )}
-      <body className={`${inter.className} min-h-screen`}>
         <UserProvider>
           <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-FGXXN9EK0N"

@@ -8,8 +8,8 @@ export const TOS_CONFIG = {
   // localStorage key to track if user has accepted TOS
   STORAGE_KEY: 'tos_accepted',
   
-  // URL for the Terms of Service page
-  TOS_URL: 'https://forsyth-county.github.io/portal/terms/',
+  // URL for Terms of Service page
+  TOS_URL: 'https://forsyth-county.github.io/portal/terms',
   
   // Message displayed in the notification
   MESSAGE: 'Hey there and welcome! Please read our terms of service before continuing on this website.',

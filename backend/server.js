@@ -46,7 +46,7 @@ app.use(helmet({
 app.use(cors({
   origin: [
     'https://forsyth-county.github.io',
-    'https://forsyth-county.github.io/portal/',
+    'https://forsyth-county.github.io/portal',
     'https://portal-t795.onrender.com',
     'https://forsyth.onrender.com',
     'http://localhost:3002',

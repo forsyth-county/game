@@ -33,10 +33,10 @@ const nextConfig = {
     ],
   },
   
-  // Trailing slash helps with static file serving
-  trailingSlash: true,
+  // Disable trailing slash to prevent redirect issues
+  trailingSlash: false,
   
-  // Skip static optimization for better GitHub Pages compatibility
+  // Skip trailing slash redirect to prevent infinite loops
   skipTrailingSlashRedirect: true,
 }
 

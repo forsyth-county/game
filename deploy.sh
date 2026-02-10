@@ -49,4 +49,4 @@ echo "📤 Pushing to GitHub Pages..."
 git push -f https://github.com/forsyth-county/portal.git main:gh-pages
 
 echo "✅ Deployment complete!"
-echo "🌐 Site will be available at: https://forsyth-county.github.io/portal/"
+echo "🌐 Site will be available at: https://forsyth-county.github.io/portal"

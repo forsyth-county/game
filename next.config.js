@@ -20,6 +20,7 @@ const nextConfig = {
   // Make basePath available to client-side code
   env: {
     NEXT_PUBLIC_BASE_PATH: basePath,
+    NEXT_PUBLIC_IS_GITHUB_PAGES: isGitHubPages.toString(),
   },
   
   images: {

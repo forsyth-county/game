@@ -9,6 +9,9 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   
+  // Transpile lucide-react for better compatibility with static export
+  transpilePackages: ['lucide-react'],
+  
   // Enable static export for GitHub Pages
   output: 'export',
   

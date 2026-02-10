@@ -15,6 +15,7 @@ import { UserProvider } from '@/lib/userContext'
 import { MouseGradient } from '@/components/MouseGradient'
 import { VisitorTracker } from '@/components/VisitorTracker'
 import { GoogleAnalytics } from '@/components/GoogleAnalytics'
+import { GitHubPagesRedirect } from '@/components/GitHubPagesRedirect'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -59,6 +60,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.className} min-h-screen`}>
+        <GitHubPagesRedirect />
         <UserProvider>
           <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-FGXXN9EK0N"

@@ -12,7 +12,7 @@ const nextConfig = {
   // Enable static export for GitHub Pages
   output: 'export',
   
-  // GitHub Pages serves from /<repo-name>/ path
+  // GitHub Pages serves from /<repo-name> path
   // Set to empty string if using custom domain or root deployment
   basePath: basePath,
   assetPrefix: basePath,

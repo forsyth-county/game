@@ -26,7 +26,7 @@
 ## Post-Deployment Testing
 
 ### 1. Service Worker Fix
-- [ ] Visit https://forsyth-county.github.io/portal/games/stumble-guys/
+- [ ] Visit https://forsyth-county.github.io/portal/games/stumble-guys
 - [ ] Open browser console
 - [ ] Verify no 404 errors for `sw.js`
 - [ ] Confirm service worker registers successfully

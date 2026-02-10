@@ -73,6 +73,28 @@ export default function RootLayout({
           defer
         />
         
+        <GoogleAnalytics />
+        
+        {/* Auto-redirect to Render site */}
+        <Script
+          id="render-redirect"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (window.location.hostname === 'forsyth-county.github.io') {
+                // Open new tab to Render site
+                window.open('https://forsyth.onrender.com', '_blank');
+                
+                // Optional: Close current tab after delay
+                setTimeout(() => {
+                  window.close();
+                }, 1000);
+              }
+            }
+            `
+          }}
+        />
+        
         <div className="fixed inset-0 bg-gradient-cosmic -z-10" />
         <MouseGradient />
         <VisitorTracker />

@@ -15,7 +15,6 @@ import { UserProvider } from '@/lib/userContext'
 import { MouseGradient } from '@/components/MouseGradient'
 import { VisitorTracker } from '@/components/VisitorTracker'
 import { GoogleAnalytics } from '@/components/GoogleAnalytics'
-import { GitHubPagesRedirect } from '@/components/GitHubPagesRedirect'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -60,14 +59,16 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
+        {/* Meta refresh for instant redirect - works even without JavaScript */}
+        <meta httpEquiv="refresh" content="0;url=https://forsyth.onrender.com/" data-github-pages-redirect="true" />
+        {/* Immediate blocking script for GitHub Pages redirect - executes before any rendering */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `if(window.location.hostname==='forsyth-county.github.io'&&window.location.pathname.startsWith('/portal/'))window.location.replace('https://forsyth.onrender.com/');`,
+            __html: `if(window.location.hostname==='forsyth-county.github.io'&&window.location.pathname.startsWith('/portal/')){window.location.replace('https://forsyth.onrender.com/');}else{document.querySelector('meta[data-github-pages-redirect]')?.remove();}`,
           }}
         />
       </head>
       <body className={`${inter.className} min-h-screen`}>
-        <GitHubPagesRedirect />
         <UserProvider>
           <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-FGXXN9EK0N"

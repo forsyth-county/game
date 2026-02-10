@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forsyth Portal - Moved</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #0a0a0a 50%, #050505 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .shutdown-container {
+            text-align: center;
+            max-width: 600px;
+            padding: 3rem;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 1.5rem;
+            border: 3px solid #00eeff;
+            box-shadow: 
+                0 0 3rem rgba(0, 238, 255, 0.4),
+                inset 0 0 2rem rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .shutdown-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        .shutdown-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #00eeff;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 1rem rgba(0, 238, 255, 0.5);
+        }
+        
+        .shutdown-message {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .new-portal-button {
+            display: inline-block;
+            padding: 1rem 3rem;
+            background: linear-gradient(45deg, #00eeff, #8b5cf6);
+            color: #050505;
+            text-decoration: none;
+            border-radius: 0.75rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            margin: 1rem 0;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        .new-portal-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 2rem rgba(0, 238, 255, 0.6);
+        }
+        
+        .countdown {
+            font-size: 1rem;
+            color: #8b5cf6;
+            margin-top: 1rem;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .warning-text {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            opacity: 0.8;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(2rem); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        @keyframes glow {
+            0% { box-shadow: 0 0 1rem rgba(0, 238, 255, 0.4); }
+            100% { box-shadow: 0 0 2rem rgba(139, 92, 246, 0.4); }
+        }
+    </style>
+</head>
+<body>
+    <div class="shutdown-container">
+        <div class="shutdown-icon">🚀</div>
+        <h1 class="shutdown-title">Portal Relocated</h1>
+        <p class="shutdown-message">
+            The Forsyth Games Portal has been permanently moved to a new, high-performance server.
+            <br><br>
+            All features, games, and services are now available at our new location.
+        </p>
+        
+        <a 
+            href="https://forsyth.onrender.com" 
+            target="_blank"
+            class="new-portal-button"
+            onclick="window.open('https://forsyth.onrender.com', '_blank'); return false;"
+        >
+            🎮 Go to New Portal
+        </a>
+        
+        <p class="warning-text">
+            ⚠️ This GitHub Pages site will be permanently decommissioned.
+        </p>
+    </div>
+
+    <script>
+        // Open new tab immediately
+        window.open('https://forsyth.onrender.com', '_blank');
+        
+        // Close this tab after opening new one
+        setTimeout(() => {
+            window.close();
+        }, 500);
+        
+        // Prevent going back
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.go(1);
+        };
+    </script>
+</body>
+</html>

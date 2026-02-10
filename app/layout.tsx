@@ -59,6 +59,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if(window.location.hostname==='forsyth-county.github.io'&&window.location.pathname.startsWith('/portal/'))window.location.replace('https://forsyth.onrender.com/');`,
+          }}
+        />
+      </head>
       <body className={`${inter.className} min-h-screen`}>
         <GitHubPagesRedirect />
         <UserProvider>

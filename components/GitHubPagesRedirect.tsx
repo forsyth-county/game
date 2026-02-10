@@ -11,7 +11,7 @@ import { useEffect } from 'react'
 export function GitHubPagesRedirect() {
   useEffect(() => {
     // Check if we're on the GitHub Pages URL
-    if (typeof window !== 'undefined' && window.location.href.includes('forsyth-county.github.io/portal/')) {
+    if (window.location.hostname === 'forsyth-county.github.io' && window.location.pathname.startsWith('/portal/')) {
       // Redirect to the Render deployment
       window.location.replace('https://forsyth.onrender.com/')
     }

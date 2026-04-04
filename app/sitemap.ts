@@ -6,7 +6,7 @@ export const dynamic = 'force-static'
 export const revalidate = 86400 // Revalidate once per day
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://forsyth-county.github.io/portal'
+  const baseUrl = 'https://forsyth.games'
 
   // Static pages
   const staticPages = [

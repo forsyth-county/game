@@ -2,7 +2,13 @@
   "redirects": [
     {
       "source": "/(.*)",
-      "destination": "https://forsyth.games",
+      "has": [
+        {
+          "type": "host",
+          "value": "(?!forsyth\\.games).*"
+        }
+      ],
+      "destination": "https://forsyth.games/$1",
       "permanent": true
     }
   ]

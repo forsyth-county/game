@@ -95,7 +95,7 @@ export function GameSuggestionForm() {
         
         // Redirect to custom success page after successful submission
         setTimeout(() => {
-          window.location.href = 'https://forsyth-county.github.io/portal/settings?success=true'
+          window.location.href = 'https://forsyth.games/settings?success=true'
         }, 2000)
         
         // Start countdown

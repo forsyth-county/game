@@ -2,7 +2,7 @@
   "redirects": [
     {
       "source": "/(.*)",
-      "destination": "https://forsyth-county.github.io/portal",
+      "destination": "https://forsyth.games",
       "permanent": true
     }
   ]

@@ -11,6 +11,7 @@ import { TosNotification } from '@/components/TosNotification'
 import { TabHider } from '@/components/TabHider'
 import { TimeBasedAccessControl } from '@/components/TimeBasedAccessControl'
 import { GeoLock } from '@/components/GeoLock'
+import { GitHubPagesRedirectOverlay } from '@/components/GitHubPagesRedirectOverlay'
 import { UserProvider } from '@/lib/userContext'
 import { MouseGradient } from '@/components/MouseGradient'
 import { VisitorTracker } from '@/components/VisitorTracker'
@@ -56,9 +57,19 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const isGitHubPages = process.env.NEXT_PUBLIC_IS_GITHUB_PAGES === 'true'
+  
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} min-h-screen`}>
+      <head>
+        {/* We keep the meta refresh as a fallback, but the JS logic moves below */}
+        {isGitHubPages && (
+          <meta httpEquiv="refresh" content="5;url=https://forsyth.onrender.com/" />
+        )}
+      </head>
+      <body className={`${inter.className} min-h-screen relative`}>
+        {/* MIGRATION OVERLAY: This is the "All-in-one" trigger */}
+        {isGitHubPages && <GitHubPagesRedirectOverlay />}
         <UserProvider>
           <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-FGXXN9EK0N"

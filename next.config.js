@@ -9,6 +9,9 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   
+  // Transpile lucide-react for better compatibility with static export
+  transpilePackages: ['lucide-react'],
+  
   // Enable static export for GitHub Pages
   output: 'export',
   
@@ -20,6 +23,7 @@ const nextConfig = {
   // Make basePath available to client-side code
   env: {
     NEXT_PUBLIC_BASE_PATH: basePath,
+    NEXT_PUBLIC_IS_GITHUB_PAGES: isGitHubPages.toString(),
   },
   
   images: {

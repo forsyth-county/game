@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Launch Portal</title>
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --accent: #00eeff;
+      --accent2: #8b5cf6;
+      --bg: #020408;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* ── Animated background ── */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,238,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,238,255,.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      animation: float 8s ease-in-out infinite;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(0,238,255,.15), transparent 70%);
+      top: -150px; left: -150px;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(139,92,246,.18), transparent 70%);
+      bottom: -120px; right: -120px;
+      animation-delay: 4s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50%       { transform: translate(30px, -30px); }
+    }
+
+    /* ── Layout ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 2rem;
+      text-align: center;
+      gap: 2rem;
+    }
+
+    /* ── Logo / badge ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .45rem 1.1rem;
+      border-radius: 999px;
+      background: rgba(0,238,255,.08);
+      border: 1px solid rgba(0,238,255,.25);
+      color: var(--accent);
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      animation: fadeDown .6s ease both;
+    }
+    .badge svg {
+      width: 14px; height: 14px;
+      fill: currentColor;
+    }
+
+    /* ── Heading ── */
+    h1 {
+      font-size: clamp(2.4rem, 8vw, 5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -.03em;
+      color: #fff;
+      animation: fadeDown .6s .12s ease both;
+    }
+    h1 span {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Sub-text ── */
+    .subtitle {
+      font-size: clamp(.95rem, 2.5vw, 1.2rem);
+      color: rgba(255,255,255,.5);
+      max-width: 480px;
+      line-height: 1.6;
+      animation: fadeDown .6s .22s ease both;
+    }
+
+    /* ── Launch button ── */
+    .launch-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: .8rem;
+      padding: 1.15rem 3rem;
+      border: none;
+      border-radius: 1rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #050505;
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      font-weight: 800;
+      letter-spacing: .02em;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s, opacity .2s;
+      animation: fadeUp .6s .35s ease both;
+      overflow: hidden;
+    }
+    .launch-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,.15);
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .launch-btn:hover {
+      transform: scale(1.06);
+      box-shadow: 0 0 40px rgba(0,238,255,.45), 0 0 80px rgba(139,92,246,.25);
+    }
+    .launch-btn:hover::before { opacity: 1; }
+    .launch-btn:active { transform: scale(.97); }
+    .launch-btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .launch-btn svg {
+      width: 22px; height: 22px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* ── Hint text ── */
+    .hint {
+      font-size: .78rem;
+      color: rgba(255,255,255,.3);
+      animation: fadeUp .6s .45s ease both;
+    }
+
+    /* ── Error banner ── */
+    .error-banner {
+      display: none;
+      align-items: center;
+      gap: .75rem;
+      padding: .9rem 1.4rem;
+      border-radius: .75rem;
+      background: rgba(239,68,68,.12);
+      border: 1px solid rgba(239,68,68,.3);
+      color: #fca5a5;
+      font-size: .88rem;
+      max-width: 480px;
+      animation: fadeDown .4s ease both;
+    }
+    .error-banner.visible { display: flex; }
+    .error-banner svg {
+      width: 18px; height: 18px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+    .error-banner a {
+      color: var(--accent);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    /* ── Fade overlay for transition out ── */
+    .fade-cover {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 999;
+      transition: opacity .5s ease;
+    }
+    .fade-cover.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ── Keyframes ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="fade-cover" id="fadeCover"></div>
+
+  <main class="page">
+    <div class="badge">
+      <!-- star icon -->
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.93 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.07-1.01z"/></svg>
+      Forsyth Educational Portal
+    </div>
+
+    <h1>Your learning,<br /><span>your way.</span></h1>
+
+    <p class="subtitle">
+      Click below to launch the portal inside a private tab.<br />
+      The address bar will show <strong style="color:rgba(255,255,255,.7)">about:blank</strong> — keeping your session discreet.
+    </p>
+
+    <button class="launch-btn" id="launchBtn" onclick="launch()">
+      <!-- rocket icon -->
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13.13 22.19l-1.63-3.83c1.57-.58 3.04-1.36 4.37-2.33l-2.74 6.16zM5.64 12.5l-3.83-1.63 6.16-2.74c-.97 1.33-1.75 2.8-2.33 4.37zM17.45 2.3A16.05 16.05 0 0 0 2.3 17.45l4.27 4.27a1 1 0 0 0 1.41 0l9.88-9.88a1 1 0 0 0 0-1.41L17.45 2.3zM11 10a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>
+      Launch Site
+    </button>
+
+    <p class="hint">Opens in a new about:blank tab &nbsp;·&nbsp; Allow popups if prompted</p>
+
+    <div class="error-banner" id="errorBanner">
+      <!-- warning icon -->
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+      <span>
+        Popup was blocked. Please
+        <a onclick="allowAndRetry()">allow popups</a>
+        for this page, then click Launch again.
+      </span>
+    </div>
+  </main>
+
+  <script>
+    // The URL loaded inside the about:blank iframe.
+    // Append __ab=1 so the site's AboutBlankCloak component doesn't loop.
+    var TARGET = 'https://forsyth.games/?__ab=1';
+
+    function launch() {
+      var btn = document.getElementById('launchBtn');
+      var err = document.getElementById('errorBanner');
+
+      btn.disabled = true;
+      err.classList.remove('visible');
+
+      // Must be triggered synchronously inside the click handler to avoid blockers.
+      var popup = window.open('about:blank', '_blank');
+
+      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+        // Popup was blocked
+        btn.disabled = false;
+        err.classList.add('visible');
+        return;
+      }
+
+      // Build the page inside the blank window entirely via DOM APIs (no innerHTML on URL).
+      var doc = popup.document;
+      doc.open();
+      doc.write(
+        '<!DOCTYPE html><html lang="en"><head>' +
+        '<meta charset="utf-8"/>' +
+        '<meta name="viewport" content="width=device-width,initial-scale=1"/>' +
+        '<title>Forsyth Educational Portal</title>' +
+        '<style>' +
+          'html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#000}' +
+          'iframe{border:none;width:100%;height:100%;display:block}' +
+          '.loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;' +
+            'background:#020408;z-index:9999;transition:opacity .4s ease}' +
+          '.loader.hidden{opacity:0;pointer-events:none}' +
+          '.spinner{width:48px;height:48px;border:3px solid rgba(0,238,255,.2);' +
+            'border-top-color:#00eeff;border-radius:50%;animation:spin .8s linear infinite}' +
+          '@keyframes spin{to{transform:rotate(360deg)}}' +
+        '</style>' +
+        '</head><body>' +
+        '<div class="loader" id="loader"><div class="spinner"></div></div>' +
+        '</body></html>'
+      );
+      doc.close();
+
+      // Create iframe via DOM so src is safely assigned (avoids XSS from URL).
+      var iframe = doc.createElement('iframe');
+      iframe.src = TARGET;
+      iframe.setAttribute('allow', 'fullscreen; autoplay; clipboard-write; encrypted-media; gamepad');
+      iframe.setAttribute(
+        'sandbox',
+        'allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-downloads allow-popups-to-escape-sandbox allow-pointer-lock'
+      );
+      iframe.allowFullscreen = true;
+
+      // Hide loader once the iframe has loaded.
+      iframe.addEventListener('load', function () {
+        var loader = doc.getElementById('loader');
+        if (loader) {
+          loader.classList.add('hidden');
+          setTimeout(function () { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 500);
+        }
+      });
+
+      doc.body.appendChild(iframe);
+      popup.focus();
+
+      // Fade out this launcher tab, then navigate it away.
+      var cover = document.getElementById('fadeCover');
+      cover.classList.add('active');
+      setTimeout(function () {
+        // Navigate the original tab to a benign page so it disappears cleanly.
+        try { window.location.replace('about:blank'); } catch (e) { /* ignore */ }
+      }, 500);
+    }
+
+    function allowAndRetry() {
+      // Re-enable button so user can try again after granting popup permission.
+      document.getElementById('launchBtn').disabled = false;
+      document.getElementById('errorBanner').classList.remove('visible');
+    }
+  </script>
+</body>
+</html>

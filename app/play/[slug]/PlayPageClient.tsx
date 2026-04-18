@@ -19,6 +19,19 @@ export default function PlayPageClient({ slug }: PlayPageClientProps) {
   const [loading, setLoading] = useState(true)
   const [item, setItem] = useState<Game | Utility | null>(null)
 
+  const handleBack = () => {
+    // When running inside the about:blank iframe (?__ab=1), window.history.back()
+    // may have no prior entries to return to (the popup was opened fresh). In that
+    // case navigate explicitly to the home page while keeping the __ab param so
+    // AboutBlankGate stays in portal mode.
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('__ab') === '1') {
+      router.push('/?__ab=1')
+    } else {
+      router.back()
+    }
+  }
+
   useEffect(() => {
     // Find the game or utility
     const game = games.find(g => g.id === slug)
@@ -53,7 +66,7 @@ export default function PlayPageClient({ slug }: PlayPageClientProps) {
         <div className="text-center space-y-4">
           <p className="text-2xl text-muted-foreground">Item not found</p>
           <button
-            onClick={() => router.back()}
+            onClick={handleBack}
             className="px-6 py-3 bg-primary text-black rounded-full font-semibold hover:scale-105 transition-transform"
           >
             Go Back
@@ -72,7 +85,7 @@ export default function PlayPageClient({ slug }: PlayPageClientProps) {
         className="glass border-b border-border p-4 flex items-center gap-4 z-50"
       >
         <button
-          onClick={() => router.back()}
+          onClick={handleBack}
           className="p-2 hover:bg-primary/10 rounded-full transition-colors"
           aria-label="Go back"
         >

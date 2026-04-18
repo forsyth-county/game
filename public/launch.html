@@ -267,8 +267,8 @@
 
   <script>
     // The URL loaded inside the about:blank iframe.
-    // Append __ab=1 so the site's AboutBlankCloak component doesn't loop.
-    var TARGET = 'https://forsyth.games/?__ab=1';
+    // Append __ab=1 so the site's AboutBlankGate component doesn't loop.
+    var TARGET = window.location.origin + '/?__ab=1';
 
     function launch() {
       var btn = document.getElementById('launchBtn');

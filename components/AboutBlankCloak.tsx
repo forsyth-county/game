@@ -52,34 +52,34 @@ export function AboutBlankCloak() {
     const popup = window.open('about:blank', '_blank')
 
     if (popup) {
-      // Write a minimal HTML document with a full-viewport iframe
-      popup.document.open()
-      popup.document.write(
-        '<!DOCTYPE html>' +
-        '<html lang="en">' +
-        '<head>' +
+      // Build the document using DOM APIs to avoid XSS from URL concatenation
+      const doc = popup.document
+      doc.open()
+      doc.write(
+        '<!DOCTYPE html><html lang="en"><head>' +
         '<meta charset="utf-8"/>' +
         '<meta name="viewport" content="width=device-width,initial-scale=1"/>' +
         '<title>Forsyth Educational Portal</title>' +
-        '<style>' +
-        'html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#000}' +
-        'iframe{border:none;width:100%;height:100%;display:block}' +
-        '</style>' +
-        '</head>' +
-        '<body>' +
-        '<iframe src="' + iframeUrl.href + '" ' +
-        'allow="fullscreen; autoplay; clipboard-write; encrypted-media" ' +
-        'sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-downloads allow-popups-to-escape-sandbox" ' +
-        'allowfullscreen></iframe>' +
-        '</body>' +
-        '</html>'
+        '<style>html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#000}</style>' +
+        '</head><body></body></html>'
       )
-      popup.document.close()
+      doc.close()
+
+      // Create iframe via DOM API so the src is safely assigned
+      const iframe = doc.createElement('iframe')
+      iframe.src = iframeUrl.href
+      iframe.setAttribute('allow', 'fullscreen; autoplay; clipboard-write; encrypted-media')
+      iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-downloads allow-popups-to-escape-sandbox')
+      iframe.allowFullscreen = true
+      iframe.style.cssText = 'border:none;width:100%;height:100%;display:block'
+      doc.body.appendChild(iframe)
+
       popup.focus()
 
-      // Replace the original tab with a benign destination so the user
-      // doesn't see two copies of the site.
-      window.location.replace('https://google.com')
+      // Replace the original tab with the browser default new-tab page so
+      // the user doesn't see two copies of the site.
+      const redirect = localStorage.getItem('forsyth-ab-redirect') || 'https://google.com'
+      window.location.replace(redirect)
     }
     // If the popup was blocked, silently degrade — the site still works
     // normally in the current tab.

@@ -32,28 +32,28 @@ export function AboutBlankToggle() {
 
     const popup = window.open('about:blank', '_blank')
     if (popup) {
-      popup.document.open()
-      popup.document.write(
-        '<!DOCTYPE html>' +
-        '<html lang="en">' +
-        '<head>' +
+      // Build the document using DOM APIs to avoid XSS from URL concatenation
+      const doc = popup.document
+      doc.open()
+      doc.write(
+        '<!DOCTYPE html><html lang="en"><head>' +
         '<meta charset="utf-8"/>' +
         '<meta name="viewport" content="width=device-width,initial-scale=1"/>' +
         '<title>Forsyth Educational Portal</title>' +
-        '<style>' +
-        'html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#000}' +
-        'iframe{border:none;width:100%;height:100%;display:block}' +
-        '</style>' +
-        '</head>' +
-        '<body>' +
-        '<iframe src="' + url.href + '" ' +
-        'allow="fullscreen; autoplay; clipboard-write; encrypted-media" ' +
-        'sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-downloads allow-popups-to-escape-sandbox" ' +
-        'allowfullscreen></iframe>' +
-        '</body>' +
-        '</html>'
+        '<style>html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#000}</style>' +
+        '</head><body></body></html>'
       )
-      popup.document.close()
+      doc.close()
+
+      // Create iframe via DOM API so the src is safely assigned
+      const iframe = doc.createElement('iframe')
+      iframe.src = url.href
+      iframe.setAttribute('allow', 'fullscreen; autoplay; clipboard-write; encrypted-media')
+      iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-downloads allow-popups-to-escape-sandbox')
+      iframe.allowFullscreen = true
+      iframe.style.cssText = 'border:none;width:100%;height:100%;display:block'
+      doc.body.appendChild(iframe)
+
       popup.focus()
     } else {
       alert(

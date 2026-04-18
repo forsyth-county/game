@@ -1,27 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ExternalLink, Rocket, ShieldAlert, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { ExternalLink, Rocket, AlertCircle } from 'lucide-react'
 
 export function AboutBlankToggle() {
-  const [enabled, setEnabled] = useState(false)
-  const [justEnabled, setJustEnabled] = useState(false)
   const [popupBlocked, setPopupBlocked] = useState(false)
   const [launching, setLaunching] = useState(false)
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setEnabled(localStorage.getItem('forsyth-ab-cloak') === 'true')
-    }
-  }, [])
-
-  const toggle = () => {
-    const next = !enabled
-    setEnabled(next)
-    localStorage.setItem('forsyth-ab-cloak', String(next))
-    setJustEnabled(next)
-  }
 
   const openInAboutBlank = () => {
     setPopupBlocked(false)
@@ -106,38 +91,13 @@ export function AboutBlankToggle() {
 
         {/* Description */}
         <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
-          Opens the portal inside an{' '}
+          The portal always launches inside an{' '}
           <code className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-sm font-mono">
             about:blank
           </code>{' '}
           tab. The address bar shows <strong>about:blank</strong> instead of the real URL.
           All games, navigation, and settings work normally inside the window.
         </p>
-
-        {/* Auto-cloak toggle */}
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
-          <div className="flex items-center gap-3">
-            <ShieldAlert className="w-5 h-5 text-purple-400" />
-            <span className="font-semibold text-slate-900 dark:text-white">
-              Auto-cloak on visit
-            </span>
-          </div>
-          <button
-            onClick={toggle}
-            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500/40 ${
-              enabled ? 'bg-purple-600' : 'bg-slate-600'
-            }`}
-            role="switch"
-            aria-checked={enabled}
-            aria-label="Toggle auto-cloak on visit"
-          >
-            <span
-              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-300 ${
-                enabled ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
-          </button>
-        </div>
 
         {/* ── Large Launch Button ── */}
         <motion.button
@@ -155,37 +115,8 @@ export function AboutBlankToggle() {
           <span>{launching ? 'Launching…' : 'Open in About:Blank'}</span>
         </motion.button>
 
-        {/* Launcher page link */}
-        <p className="text-center text-sm text-slate-500 dark:text-slate-400">
-          Want a dedicated launcher page?{' '}
-          <a
-            href="/launch.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-purple-400 hover:text-purple-300 underline underline-offset-2 transition-colors"
-          >
-            Open launch page →
-          </a>
-        </p>
-
         {/* Feedback messages */}
         <AnimatePresence>
-          {justEnabled && (
-            <motion.div
-              key="enabled"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="flex items-start gap-3 p-4 rounded-2xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20"
-            >
-              <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-green-700/90 dark:text-green-300/90">
-                Auto-cloak <strong>enabled</strong>. Next time you visit the site it will
-                automatically open in an about:blank tab.
-              </p>
-            </motion.div>
-          )}
-
           {popupBlocked && (
             <motion.div
               key="blocked"

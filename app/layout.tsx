@@ -9,7 +9,7 @@ import { ScreenPrivacyGuard } from '@/components/ScreenPrivacyGuard'
 import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { TosNotification } from '@/components/TosNotification'
 import { TabHider } from '@/components/TabHider'
-import { AboutBlankCloak } from '@/components/AboutBlankCloak'
+import { AboutBlankGate } from '@/components/AboutBlankGate'
 import { GeoLock } from '@/components/GeoLock'
 import { UserProvider } from '@/lib/userContext'
 import { MouseGradient } from '@/components/MouseGradient'
@@ -151,22 +151,23 @@ export default function RootLayout({
           }}
         />
         
-        <div className="fixed inset-0 bg-gradient-cosmic -z-10" />
-        <MouseGradient />
-        <VisitorTracker />
-        <GeoLock />
-        <Protection />
-        <ScreenPrivacyGuard />
-        <TabCloakLoader />
-        <AboutBlankCloak />
-        <TabHider />
-        <AnnouncementBanner />
-        <TosNotification />
-        <Navigation />
-        <main className="pt-24 pb-12 px-4">
-          {children}
-        </main>
-        {/* Analytics and SpeedInsights removed */}
+        <AboutBlankGate>
+          <div className="fixed inset-0 bg-gradient-cosmic -z-10" />
+          <MouseGradient />
+          <VisitorTracker />
+          <GeoLock />
+          <Protection />
+          <ScreenPrivacyGuard />
+          <TabCloakLoader />
+          <TabHider />
+          <AnnouncementBanner />
+          <TosNotification />
+          <Navigation />
+          <main className="pt-24 pb-12 px-4">
+            {children}
+          </main>
+          {/* Analytics and SpeedInsights removed */}
+        </AboutBlankGate>
         </UserProvider>
       </body>
     </html>

@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { Settings as SettingsIcon, Shield, User } from 'lucide-react'
 import { TabCloak } from '@/components/TabCloak'
+import { AboutBlankToggle } from '@/components/AboutBlankToggle'
 import { GameSuggestionForm } from '@/components/GameSuggestionForm'
 import { FormSuccessNotification } from '@/components/FormSuccessNotification'
 import { cn } from "@/lib/utils";
@@ -208,6 +209,16 @@ export default function SettingsPage() {
               className="w-full"
             >
               <TabCloak />
+            </motion.div>
+
+            {/* About:Blank Cloaking Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.075 }}
+              className="w-full"
+            >
+              <AboutBlankToggle />
             </motion.div>
 
             {/* Game Suggestions Section */}

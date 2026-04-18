@@ -9,6 +9,7 @@ import { ScreenPrivacyGuard } from '@/components/ScreenPrivacyGuard'
 import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { TosNotification } from '@/components/TosNotification'
 import { TabHider } from '@/components/TabHider'
+import { AboutBlankCloak } from '@/components/AboutBlankCloak'
 import { TimeBasedAccessControl } from '@/components/TimeBasedAccessControl'
 import { GeoLock } from '@/components/GeoLock'
 import { UserProvider } from '@/lib/userContext'
@@ -159,6 +160,7 @@ export default function RootLayout({
         <Protection />
         <ScreenPrivacyGuard />
         <TabCloakLoader />
+        <AboutBlankCloak />
         <TabHider />
         <AnnouncementBanner />
         <TosNotification />

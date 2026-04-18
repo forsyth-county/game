@@ -145,6 +145,8 @@ export function AboutBlankToggle() {
           whileTap={{ scale: 0.97 }}
           onClick={openInAboutBlank}
           disabled={launching}
+          aria-busy={launching}
+          aria-live="polite"
           className="relative w-full flex items-center justify-center gap-3 px-6 py-5 rounded-2xl font-bold text-lg text-white bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-700 hover:via-fuchsia-700 hover:to-pink-700 shadow-xl hover:shadow-purple-500/40 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300 overflow-hidden"
         >
           {/* Shimmer overlay */}

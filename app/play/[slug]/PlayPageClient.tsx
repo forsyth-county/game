@@ -20,15 +20,15 @@ export default function PlayPageClient({ slug }: PlayPageClientProps) {
   const [item, setItem] = useState<Game | Utility | null>(null)
 
   const handleBack = () => {
-    // When running inside the about:blank iframe (?__ab=1), window.history.back()
-    // may have no prior entries to return to (the popup was opened fresh). In that
-    // case navigate explicitly to the home page while keeping the __ab param so
-    // AboutBlankGate stays in portal mode.
+    // Always navigate to the home page. When inside the about:blank popup
+    // (either __ab=1 is in the URL, or we're detected as being in an iframe)
+    // keep the __ab=1 param so AboutBlankGate stays in portal mode.
     const params = new URLSearchParams(window.location.search)
-    if (params.get('__ab') === '1') {
+    const isInIframe = typeof window !== 'undefined' && window.self !== window.top
+    if (params.get('__ab') === '1' || isInIframe) {
       router.push('/?__ab=1')
     } else {
-      router.back()
+      router.push('/')
     }
   }
 

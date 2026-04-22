@@ -30,7 +30,11 @@ export function AboutBlankGate({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
-    if (params.get('__ab') === '1') {
+    // Portal mode when:
+    // 1. __ab=1 is in the URL (initial load), OR
+    // 2. We're inside an iframe (user navigated within the popup and URL lost __ab=1)
+    const isInIframe = window.self !== window.top
+    if (params.get('__ab') === '1' || isInIframe) {
       setMode('portal')
     } else {
       setMode('launcher')
